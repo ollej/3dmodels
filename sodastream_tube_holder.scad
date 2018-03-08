@@ -7,19 +7,19 @@ $fn=100;
 BASE_WIDTH = 61;
 BASE_HEIGHT = 20;
 
-THICKNESS_BASE = 4;
-THICKNESS_WALL = 3;
+THICKNESS_BASE = 5;
+THICKNESS_WALL = 5;
 BASE_SUPPORT_WIDTH = 10;
 CUT_SPACING = 10;
 HOLE_DIAMETER = BASE_HEIGHT - THICKNESS_WALL;
 
-HOOK_DEPTH = 17;
+HOOK_DEPTH = 20;
 HOOK_HEIGHT = 20;
 
-HOLDER_THICKNESS = 5;
+HOLDER_THICKNESS = 8;
 HOLDER_HEIGHT = 280 + THICKNESS_BASE + HOLDER_THICKNESS + HOOK_HEIGHT + CUT_SPACING;
 //HOLDER_HEIGHT = 240;
-HOLDER_WIDTH = 20;
+HOLDER_WIDTH = 30;
 HOLDER_POSITION = BASE_WIDTH / 2 + HOLDER_THICKNESS / 2;
 
 KEG_RADIUS = 110;
@@ -27,7 +27,7 @@ KEG_RADIUS = 110;
 COLLAR_HEIGHT = 20;
 
 
-STRAP_WIDTH = 15;
+STRAP_WIDTH = 25;
 STRAP_THICKNESS = 3;
 STRAP_BUCKLE_WALL = 5;
 STRAP_BUCKLE_WIDTH = HOLDER_WIDTH + STRAP_THICKNESS * 2 + STRAP_BUCKLE_WALL;
@@ -102,10 +102,11 @@ module strap_buckle() {
         }
         
         // Make room for straps behind buckle
-        translate([HOLDER_WIDTH / 2 + STRAP_THICKNESS, 2, 0]) {
+        strap_hole_pos = HOLDER_THICKNESS / 2 - STRAP_THICKNESS / 2 + 1;
+        translate([HOLDER_WIDTH / 2 + STRAP_THICKNESS, strap_hole_pos, 0]) {
             cube([STRAP_BUCKLE_WALL, 2, STRAP_WIDTH], center = true);
         }
-        translate([0 - (HOLDER_WIDTH / 2 + STRAP_THICKNESS), 2, 0]) {
+        translate([0 - (HOLDER_WIDTH / 2 + STRAP_THICKNESS), strap_hole_pos, 0]) {
             cube([STRAP_BUCKLE_WALL, 2, STRAP_WIDTH], center = true);
         }
         
@@ -126,6 +127,7 @@ module hook() {
 }
 
 module holder() {
+    /*
     difference() {
         hanger();
         
@@ -140,6 +142,8 @@ module holder() {
         }
 
     }
+    */
+    hanger();
     translate([0, -1, 0]) base();
     translate([0, -1, 0]) collar();
 }
@@ -182,20 +186,20 @@ module rotatedHolder() {
 }
 
 module cutHolder() {
-//    intersection() {
-//        rotatedHolder();
-//        cutter(CUTS[0], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
-//    }
+    intersection() {
+        rotatedHolder();
+        cutter(CUTS[0], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
+    }
 //    intersection() {
 //        rotatedHolder();
 //        cutter(CUTS[0], CUT_CUBE_DIM, DOVETAIL_TEETH, false);
 //        cutter(CUTS[1], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
 //    }
-    intersection() {
-        rotatedHolder();
-        cutter(CUTS[1], CUT_CUBE_DIM, DOVETAIL_TEETH, false);
-        //cutter(CUTS[2], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
-    }
+//    intersection() {
+//        rotatedHolder();
+//        cutter(CUTS[1], CUT_CUBE_DIM, DOVETAIL_TEETH, false);
+//        //cutter(CUTS[2], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
+//    }
     
     // Third cut
     //intersection() {
