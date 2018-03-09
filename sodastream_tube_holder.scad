@@ -13,7 +13,7 @@ BASE_SUPPORT_WIDTH = 10;
 CUT_SPACING = 10;
 HOLE_DIAMETER = BASE_HEIGHT - THICKNESS_WALL;
 
-HOOK_DEPTH = 20;
+HOOK_DEPTH = 25;
 HOOK_HEIGHT = 20;
 
 HOLDER_THICKNESS = 8;
@@ -39,7 +39,7 @@ UPPER_BUCKLE_POSITION = HOLDER_HEIGHT - HOLDER_THICKNESS - HOOK_HEIGHT - COLLAR_
 //CUTS = [[0, 150, 0], [0, 260, 0], [0, 290, 0]];
 CUTS = [[0, 150, 0], [0, 290, 0]];
 DOVETAIL_CLEAR = 0.3;
-DOVETAIL_TEETH = [10, 4, DOVETAIL_CLEAR];
+DOVETAIL_TEETH = [3, 4, DOVETAIL_CLEAR];
 
 OUTER_DIAMETER = BASE_WIDTH + THICKNESS_WALL * 2;
 //CUT_CUBE_DIM = [OUTER_DIAMETER + 10, 250, OUTER_DIAMETER + 10];
@@ -186,20 +186,25 @@ module rotatedHolder() {
 }
 
 module cutHolder() {
-    intersection() {
-        rotatedHolder();
-        cutter(CUTS[0], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
-    }
+    // Base
+//    intersection() {
+//        rotatedHolder();
+//        cutter(CUTS[0], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
+//    }
+    
+    // Collar
 //    intersection() {
 //        rotatedHolder();
 //        cutter(CUTS[0], CUT_CUBE_DIM, DOVETAIL_TEETH, false);
 //        cutter(CUTS[1], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
 //    }
-//    intersection() {
-//        rotatedHolder();
-//        cutter(CUTS[1], CUT_CUBE_DIM, DOVETAIL_TEETH, false);
-//        //cutter(CUTS[2], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
-//    }
+    
+    // Hook
+    intersection() {
+        rotatedHolder();
+        cutter(CUTS[1], CUT_CUBE_DIM, DOVETAIL_TEETH, false);
+        //cutter(CUTS[2], CUT_CUBE_DIM, DOVETAIL_TEETH, true);
+    }
     
     // Third cut
     //intersection() {
