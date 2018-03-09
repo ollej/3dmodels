@@ -1,5 +1,5 @@
-Sodastream Bottle Holder
-========================
+Customizable Sodastream bottle holder for Cornelius kegs
+========================================================
 
 Summary
 -------

@@ -1,39 +1,50 @@
+// Customizable Sodastream bottle holder for Cornelius kegs
 // Copyright: Olle Johansson 2018
 // License: CC BY-SA
 
 //CUSTOMIZER VARIABLES
 
-// This is the total height of the holder
-height_of_holder = 325;
+/* [Holder] */
 
-// Width of the Sodastream bottle
-inner_width_of_collars = 60;
-
-// The height of each collar around the Sodastream bottle
-height_of_collars = 20; // [10:50]
-
-// Thickness of collar walls
-thickness_of_collars = 5; // [1:10]
-
-// Thickness of the cross at the bottom of the base collar
-thickness_of_bottom = 5; // [1:10]
-
-// Detpth of the hook at the top
-depth_of_hook = 25; // [10:40]
-
-// Height of the hook from the top
-height_of_hook = 20; // [5:30]
-
-// Thickness of the holder connecting the collars
+// Thickness in mm of the holder connecting the collars
 thickness_of_holder = 8; // [5:10]
 
-// Width of the holder connecting the collars
+// Width in mm of the holder connecting the collars
 width_of_holder = 30; // [10:50]
 
-// Height of the strap buckles
+// This is the total height in mm of the holder
+height_of_holder = 325; // [175:350]
+
+/* [Collars] */
+
+// The height in mm of each collar around the Sodastream bottle
+height_of_collars = 20; // [10:50]
+
+// Thickness in mm of collar walls
+thickness_of_collars = 5; // [3:10]
+
+// Thickness in mm of the cross at the bottom of the base collar
+thickness_of_bottom = 5; // [3:10]
+
+// Width in mm of the Sodastream bottle
+inner_width_of_collars = 60; // [60:70]
+
+/* [Hook] */
+
+// Depth in mm of the hook at the top
+depth_of_hook = 25; // [10:40]
+
+// Height in mm of the hook from the top
+height_of_hook = 20; // [5:30]
+
+/* [Buckles] */
+
+// Height in mm of the strap buckles
 height_of_buckle = 30; // [20:50]
 
 //CUSTOMIZER VARIABLES END
+
+/* [Hidden] */
 
 $fn=100;
 
