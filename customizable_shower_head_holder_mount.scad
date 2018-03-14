@@ -9,34 +9,6 @@
 // Choose mounting option
 type_of_mount = 1; // [1:Spool, 2:Cylinder]
 
-/* [Spool/Cylinder] */
-
-// Width in mm of spool/cylinder
-width_of_spool = 31; // [20:40]
-
-// Diameter in mm of hole in spool/cylinder
-spool_bolt_hole = 7; // [6:10]
-
-// Diameter in mm of spool/cylinder
-diameter_of_spool = 30; // [25:40]
-
-// Thickness in mm of disks on spool
-thickness_of_disks = 4; // [3:8]
-
-// Diameter in mm of middle of spool
-diameter_of_cylinder = 16; // [11:24]
-
-/* [Cutout] */
-
-// Depth in mm of cutout in mount
-depth_of_cutout = 2.4; // [1:4]
-
-// Angle of cutout slice
-angle_of_cutout = 75; // [30:90]
-
-// Position in degrees of cutout
-position_of_cutout = 235; // [0:360]
-
 /* [Holder] */
 
 // Height in mm of shower head holder
@@ -56,6 +28,37 @@ holder_angle = 10; // [0:30]
 
 // Width in mm of hole in holder wall
 holder_hole_width = 16; // [10:20]
+
+/* [Spool/Cylinder] */
+
+// Width in mm of spool/cylinder
+width_of_spool = 31; // [20:40]
+
+// Diameter in mm of hole in spool/cylinder
+spool_bolt_hole = 7; // [6:10]
+
+// Diameter in mm of spool/cylinder
+diameter_of_spool = 30; // [25:40]
+
+// Thickness in mm of disks on spool
+thickness_of_disks = 4; // [3:8]
+
+// Diameter in mm of middle of spool
+diameter_of_cylinder = 16; // [11:24]
+
+/* [Cutout] */
+
+// Add a cutout notch in the side of the spool/cylinder
+cutout_type = 1; // [0:None, 1:Left side, 2:Right side]
+
+// Depth in mm of cutout in mount
+depth_of_cutout = 2.4; // [1:4]
+
+// Angle of cutout slice
+angle_of_cutout = 75; // [30:90]
+
+// Rotation in degrees of cutout
+rotation_of_cutout = 235; // [0:360]
 
 //CUSTOMIZER VARIABLES END
 
@@ -82,9 +85,11 @@ module slice(r = 10, deg = 30) {
     }
 }
 
-module pie_slice() {
-    rotate([0, 0, position_of_cutout])
-    translate([0, 0, width_of_spool / 2 - thickness_of_disks / 4])
+module cutout(left_or_right) {
+    position = (width_of_spool / 2 - depth_of_cutout / 2);
+    mirror([0, 0, left_or_right]) 
+    rotate([0, 0, rotation_of_cutout])
+    translate([0, 0, position])
     linear_extrude(height = depth_of_cutout, center = true)
     slice(r = diameter_of_spool / 2 + 1, deg = angle_of_cutout);
 }
@@ -96,7 +101,8 @@ module spool() {
         // Remove middle part of cylinder
         cylinder(h = width_of_spool - thickness_of_disks * 2, d = diameter_of_spool, center = true);
 
-        pie_slice();
+        // Add a cutout notch in the side of the spool
+        if (cutout_type != 0) cutout(cutout_type - 1);
     }
 
     // Thin center cylinder
@@ -116,7 +122,9 @@ module cylinder_mount() {
     difference() {
         cylinder(h = width_of_spool, d = diameter_of_spool, center = true);
         cylinder(h = width_of_spool, d = spool_bolt_hole, center = true);
-        pie_slice();
+
+        // Add a cutout notch in the side of the spool
+        if (cutout_type != 0) cutout(cutout_type - 1);
     }
 }
 

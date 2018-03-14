@@ -8,6 +8,12 @@ This is a customizable shower head holder mount replacement that fits the
 mount on my shower. It's made to be mounted with an M6 bolt onto the mount on
 the rail.
 
+There are two mount options, spool and cylinder. They should be mounted with a
+bolt going through it.
+
+There are three sizes of the holder included, each with both mount options. If
+you want to customize it further you can do it via the customizer.
+
 Print Settings
 --------------
 
@@ -22,13 +28,6 @@ Top/bottom layers: 5
 ### Notes
 
 I've printed mine with the bolt hole vertically.
-
-TODO
-----
-
-* Wall mount
-* Pipe/Rail mount
-* Multiple shower head versions: 18, 20, 23
 
 License
 -------
