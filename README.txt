@@ -27,7 +27,7 @@ Top/bottom layers: 5
 
 ### Notes
 
-I've printed mine with the bolt hole vertically.
+I've printed mine with the bolt hole vertically in PETG.
 
 License
 -------

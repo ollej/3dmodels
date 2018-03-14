@@ -7,7 +7,7 @@
 /* [Mount] */
 
 // Choose mounting option
-type_of_mount = 1; // [1:Spool, 2:Cylinder]
+type_of_mount = 3; // [1:Spool, 2:Cylinder, 3:Wall mount]
 
 /* [Holder] */
 
@@ -28,6 +28,23 @@ holder_angle = 10; // [0:30]
 
 // Width in mm of hole in holder wall
 holder_hole_width = 16; // [10:20]
+
+/* [Wall mount] */
+
+// Width in mm of wall mount
+width_of_mount = 55; // [45:60]
+
+// Height in mm of wall mount
+height_of_mount = 30; // [20:40]
+
+// Depth in mm of wall mount
+depth_of_mount = 10; // [8:15]
+
+// Width in mm of rounded edge
+width_of_rounded_edge = 15; // [10:20]
+
+// Diameter in mm of mount screw hole
+diameter_of_mount_hole = 7; // [4:10]
 
 /* [Spool/Cylinder] */
 
@@ -58,7 +75,7 @@ depth_of_cutout = 2.4; // [1:4]
 angle_of_cutout = 75; // [30:90]
 
 // Rotation in degrees of cutout
-rotation_of_cutout = 235; // [0:360]
+rotation_of_cutout = 215; // [0:360]
 
 //CUSTOMIZER VARIABLES END
 
@@ -128,8 +145,37 @@ module cylinder_mount() {
     }
 }
 
+module rounded_edge() {
+    translate([width_of_mount / 2, 0 - depth_of_mount / 2, 0])
+        scale([1, 0.25, 1])
+        cylinder(h = height_of_mount, r = width_of_rounded_edge, center = true);
+}
+
+module mount_hole() {
+    rotate([90, 0, 0])
+    //translate([width_of_mount / 2 - width_of_rounded_edge / 2, 0, 0]) {
+    translate([width_of_mount / 2 - diameter_of_mount_hole, 0, 0]) {
+        cylinder(h = depth_of_mount, d = diameter_of_mount_hole, center = true);
+
+        // Screw head shoulder
+        translate([0, 0, depth_of_mount / 4])
+        cylinder(h = depth_of_mount / 2, d = diameter_of_mount_hole * 1.5, center = true);
+    }
+}
+
+module wall_mount() {
+    rotate([0, 0, 90])
+    difference() {
+        cube([width_of_mount, depth_of_mount, height_of_mount], center = true);
+        rounded_edge();
+        mirror([1, 0, 0]) rounded_edge();
+        mount_hole();
+        mirror([1, 0, 0])  mount_hole();
+    }
+}
+
 module holder() {
-    rotate([0, 0 - holder_angle, 0])
+    rotate([0, holder_angle, 0])
     translate([14.5 + spool_bolt_hole / 2, 0, 0])
     difference() {
         cylinder(h = holder_height, d1 = holder_bottom_diameter + holder_wall_width, d2 = holder_top_diameter + holder_wall_width, center = true);
@@ -151,10 +197,15 @@ module holder() {
     }
 }
 
+module mount() {
+    if (type_of_mount == 1) spool_mount();
+    else if (type_of_mount == 2) cylinder_mount();
+    else wall_mount();
+}
+
 module shower_holder() {
     difference() {
-        if (type_of_mount == 1) spool_mount();
-        else cylinder_mount();
+        mount();
         hull() holder();
     }
     holder();
