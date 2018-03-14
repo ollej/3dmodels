@@ -4,43 +4,58 @@
 
 //CUSTOMIZER VARIABLES
 
-/* [Fastener] */
+/* [Mount] */
 
-type_of_spool = 1; // [1:Spool, 2:Cylinder]
+// Choose mounting option
+type_of_mount = 1; // [1:Spool, 2:Cylinder]
 
-width_of_spool = 31;
+/* [Spool/Cylinder] */
 
-diameter_of_spool = 30;
+// Width in mm of spool/cylinder
+width_of_spool = 31; // [20:40]
 
-hole_in_spool = 7;
+// Diameter in mm of hole in spool/cylinder
+spool_bolt_hole = 7; // [6:10]
 
-/* [Spool] */
+// Diameter in mm of spool/cylinder
+diameter_of_spool = 30; // [25:40]
 
-thickness_of_disks = 4;
+// Thickness in mm of disks on spool
+thickness_of_disks = 4; // [3:8]
 
-diameter_of_cylinder = 16;
+// Diameter in mm of middle of spool
+diameter_of_cylinder = 16; // [11:24]
 
-/* [Pie slice] */
+/* [Cutout] */
 
-depth_of_slice = 2.4;
+// Depth in mm of cutout in mount
+depth_of_cutout = 2.4; // [1:4]
 
-angle_of_slice = 75;
+// Angle of cutout slice
+angle_of_cutout = 75; // [30:90]
 
-position_of_slice = 235;
+// Position in degrees of cutout
+position_of_cutout = 235; // [0:360]
 
 /* [Holder] */
 
-holder_height = 30;
+// Height in mm of shower head holder
+holder_height = 30; // [15:40]
 
-holder_wall_width = 6;
+// Width in mm of holder wall
+holder_wall_width = 6; // [2:12]
 
-holder_top_diameter = 24;
+// Top inner diameter of holder in mm
+holder_top_diameter = 24; // [18:30]
 
-holder_bottom_diameter = 21;
+// Bottom inner diameter of holder in mm
+holder_bottom_diameter = 21; // [16:30]
 
-holder_angle = 10;
+// Angle of holder
+holder_angle = 10; // [0:30]
 
-holder_hole_width = 16;
+// Width in mm of hole in holder wall
+holder_hole_width = 16; // [10:20]
 
 //CUSTOMIZER VARIABLES END
 
@@ -68,10 +83,10 @@ module slice(r = 10, deg = 30) {
 }
 
 module pie_slice() {
-    rotate([0, 0, position_of_slice])
+    rotate([0, 0, position_of_cutout])
     translate([0, 0, width_of_spool / 2 - thickness_of_disks / 4])
-    linear_extrude(height = depth_of_slice, center = true)
-    slice(r = diameter_of_spool / 2 + 1, deg = angle_of_slice);
+    linear_extrude(height = depth_of_cutout, center = true)
+    slice(r = diameter_of_spool / 2 + 1, deg = angle_of_cutout);
 }
 
 module spool() {
@@ -88,26 +103,26 @@ module spool() {
     cylinder(h = width_of_spool, d = diameter_of_cylinder, center = true);
 }
 
-module fastener() {
+module spool_mount() {
     rotate([90, 0, 0])
     difference() {
         spool();
-        cylinder(h = width_of_spool, d = hole_in_spool, center = true);
+        cylinder(h = width_of_spool, d = spool_bolt_hole, center = true);
     }
 }
 
-module fastener_full() {
+module cylinder_mount() {
     rotate([90, 0, 0])
     difference() {
         cylinder(h = width_of_spool, d = diameter_of_spool, center = true);
-        cylinder(h = width_of_spool, d = hole_in_spool, center = true);
+        cylinder(h = width_of_spool, d = spool_bolt_hole, center = true);
         pie_slice();
     }
 }
 
 module holder() {
     rotate([0, 0 - holder_angle, 0])
-    translate([14.5 + hole_in_spool / 2, 0, 0])
+    translate([14.5 + spool_bolt_hole / 2, 0, 0])
     difference() {
         cylinder(h = holder_height, d1 = holder_bottom_diameter + holder_wall_width, d2 = holder_top_diameter + holder_wall_width, center = true);
         cylinder(h = holder_height, d1 = holder_bottom_diameter, d2 = holder_top_diameter, center = true);
@@ -124,14 +139,14 @@ module holder() {
 
         // Front hole
         translate([holder_top_diameter / 2.5, 0, 0])
-            cube([holder_top_diameter / 2, holder_hole_width, holder_height], center = true);
+            cube([holder_top_diameter / 2 + holder_wall_width, holder_hole_width, holder_height], center = true);
     }
 }
 
 module shower_holder() {
     difference() {
-        if (type_of_spool == 1) fastener();
-        else fastener_full();
+        if (type_of_mount == 1) spool_mount();
+        else cylinder_mount();
         hull() holder();
     }
     holder();
