@@ -15,7 +15,7 @@ type_of_mount = 3; // [1:Spool, 2:Cylinder, 3:Wall mount]
 holder_height = 30; // [15:40]
 
 // Width in mm of holder wall
-holder_wall_width = 6; // [2:12]
+holder_wall_width = 6; // [4:12]
 
 // Top inner diameter of holder in mm
 holder_top_diameter = 24; // [18:30]
@@ -24,7 +24,7 @@ holder_top_diameter = 24; // [18:30]
 holder_bottom_diameter = 21; // [16:30]
 
 // Angle of holder
-holder_angle = 10; // [0:30]
+holder_angle = 10; // [0:25]
 
 // Width in mm of hole in holder wall
 holder_hole_width = 16; // [10:20]
@@ -164,6 +164,7 @@ module mount_hole() {
 }
 
 module wall_mount() {
+    translate([1, 0, -1])
     rotate([0, 0, 90])
     difference() {
         cube([width_of_mount, depth_of_mount, height_of_mount], center = true);
