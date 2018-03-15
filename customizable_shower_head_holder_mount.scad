@@ -1,4 +1,4 @@
-// Customizable Shower Head Holder
+// Customizable Shower Head Holder Mount
 // Copyright: Olle Johansson 2018
 // License: CC BY-SA
 
@@ -7,7 +7,7 @@
 /* [Mount] */
 
 // Choose mounting option
-type_of_mount = 3; // [1:Spool, 2:Cylinder, 3:Wall mount]
+type_of_mount = 4; // [1:Spool, 2:Cylinder, 3:Wall mount, 4:Rod Screw Mount]
 
 /* [Holder] */
 
@@ -15,7 +15,7 @@ type_of_mount = 3; // [1:Spool, 2:Cylinder, 3:Wall mount]
 holder_height = 30; // [15:40]
 
 // Width in mm of holder wall
-holder_wall_width = 6; // [4:12]
+holder_wall_width = 7; // [4:12]
 
 // Top inner diameter of holder in mm
 holder_top_diameter = 24; // [18:30]
@@ -42,6 +42,26 @@ depth_of_mount = 10; // [8:15]
 
 // Width in mm of rounded edge
 width_of_rounded_edge = 15; // [10:20]
+
+// Diameter in mm of mount screw hole
+diameter_of_mount_hole = 7; // [4:10]
+
+/* [Rod Screw Mount] */
+
+// Diameter in mm of rod to mount on
+diameter_of_rod = 18; // [15:25]
+
+// Width in mm of rod screw mount
+width_of_rodmount = 55; // [45:60]
+
+// Height in mm of rod screw mount
+height_of_rodmount = 25; // [20:40]
+
+// Depth in mm of rod screw mount
+depth_of_rodmount = 13; // [12:25]
+
+// Width in mm of rounded edge of rod screw mount
+width_of_rodmount_rounded_edge = 15; // [10:20]
 
 // Diameter in mm of mount screw hole
 diameter_of_mount_hole = 7; // [4:10]
@@ -127,6 +147,7 @@ module spool() {
 }
 
 module spool_mount() {
+    translate([0 - diameter_of_spool / 2 + diameter_of_cylinder / 2, 0, 2])
     rotate([90, 0, 0])
     difference() {
         spool();
@@ -135,6 +156,7 @@ module spool_mount() {
 }
 
 module cylinder_mount() {
+    translate([0 - diameter_of_spool / 2 + diameter_of_cylinder / 2, 0, 2])
     rotate([90, 0, 0])
     difference() {
         cylinder(h = width_of_spool, d = diameter_of_spool, center = true);
@@ -145,39 +167,65 @@ module cylinder_mount() {
     }
 }
 
-module rounded_edge() {
-    translate([width_of_mount / 2, 0 - depth_of_mount / 2, 0])
-        scale([1, 0.25, 1])
-        cylinder(h = height_of_mount, r = width_of_rounded_edge, center = true);
+module rounded_edge(width, depth, height, edge_scale) {
+    translate([width / 2, 0 - depth / 2, 0])
+        scale([1, edge_scale, 1])
+        cylinder(h = height, r = width_of_rounded_edge, center = true);
 }
 
-module mount_hole() {
+module mount_hole(width, depth) {
     rotate([90, 0, 0])
     //translate([width_of_mount / 2 - width_of_rounded_edge / 2, 0, 0]) {
-    translate([width_of_mount / 2 - diameter_of_mount_hole, 0, 0]) {
-        cylinder(h = depth_of_mount, d = diameter_of_mount_hole, center = true);
+    translate([width / 2 - diameter_of_mount_hole, 0, 0]) {
+        cylinder(h = depth, d = diameter_of_mount_hole, center = true);
 
         // Screw head shoulder
-        translate([0, 0, depth_of_mount / 4])
-        cylinder(h = depth_of_mount / 2, d = diameter_of_mount_hole * 1.5, center = true);
+        translate([0, 0, depth / 4])
+        cylinder(h = depth / 2, d = diameter_of_mount_hole * 1.5, center = true);
     }
 }
 
 module wall_mount() {
-    translate([1, 0, -1])
+    translate([0 - depth_of_mount / 2, 0, 2])
     rotate([0, 0, 90])
     difference() {
         cube([width_of_mount, depth_of_mount, height_of_mount], center = true);
-        rounded_edge();
-        mirror([1, 0, 0]) rounded_edge();
-        mount_hole();
-        mirror([1, 0, 0])  mount_hole();
+        rounded_edge(width_of_mount, depth_of_mount, height_of_mount, 0.25);
+        mirror([1, 0, 0]) rounded_edge(width_of_mount, depth_of_mount, height_of_mount, 0.25);
+
+        // Screw holes
+        mount_hole(width_of_mount, depth_of_mount);
+        mirror([1, 0, 0]) mount_hole(width_of_mount, depth_of_mount);
     }
 }
 
+module rod_screw_plate() {
+    translate([0 - depth_of_rodmount / 2, 0, 2])
+    rotate([0, 0, 90])
+    difference() {
+        cube([width_of_rodmount, depth_of_rodmount, height_of_rodmount], center = true);
+        rounded_edge(width_of_rodmount, depth_of_rodmount, height_of_rodmount, 0.5);
+        mirror([1, 0, 0]) rounded_edge(width_of_rodmount, depth_of_rodmount, height_of_rodmount, 0.5);
+
+        // Screw holes
+        mount_hole(width_of_rodmount, depth_of_rodmount);
+        mirror([1, 0, 0]) mount_hole(width_of_rodmount, depth_of_rodmount);
+
+        // Rod hole
+        translate([0, depth_of_rodmount / 2, 0])
+        cylinder(h = height_of_rodmount, d = diameter_of_rod, center = true);
+    }
+}
+
+module rod_screw_mount() {
+    rod_screw_plate();
+    translate([0, 0, height_of_rodmount + 10])
+        rod_screw_plate();
+}
+
 module holder() {
+    translate([holder_top_diameter / 2, 0, 0])
     rotate([0, holder_angle, 0])
-    translate([14.5 + spool_bolt_hole / 2, 0, 0])
     difference() {
         cylinder(h = holder_height, d1 = holder_bottom_diameter + holder_wall_width, d2 = holder_top_diameter + holder_wall_width, center = true);
         cylinder(h = holder_height, d1 = holder_bottom_diameter, d2 = holder_top_diameter, center = true);
@@ -201,7 +249,8 @@ module holder() {
 module mount() {
     if (type_of_mount == 1) spool_mount();
     else if (type_of_mount == 2) cylinder_mount();
-    else wall_mount();
+    else if (type_of_mount == 3) wall_mount();
+    else rod_screw_mount();
 }
 
 module shower_holder() {
