@@ -7,34 +7,64 @@
 /* [Coin] */
 
 // Diameter of coin in mm
-diameter_of_coin = 50; // [20:100]
+diameter_of_coin = 50; // [30:100]
 
 // Thickness of coin in mm
 thickness_of_coin = 10; // [5:20]
 
-diameter_of_inner_circle = diameter_of_coin - 15;
+/* [Notches] */
 
-diameter_of_ridges = 10;
+// Add notches on edge of coin
+display_notches = 1; // [1:Yes, 0:No]
 
-diameter_of_sun = 20;
+// Width in mm of each notch on edge
+width_of_notches = 10; // [5:15]
 
+// Number of notches around edge
+number_of_notches = 12; // [6:16]
+
+/* [Sun] */
+
+// Add sun in middle
+display_sun = 1; // [1:Yes, 0:No]
+
+// Diameter of sun in mm (excluding rays)
+diameter_of_sun = 17; // [10:25]
+
+// Height in mm of sun ray triangles
+height_sun_ray = 5; // [2:10]
+
+// Number of triangle rays on sun
+number_of_sun_rays = 48; // [8:99]
+
+/* [Text] */
+
+// Show text in circle
+display_text = 1; // [1:Yes, 0:No]
+
+// Text to print in a circle around the coin
 text_around_coin = "Exalted Printing";
 
+// Font to use on the text
 font_on_text = "Gotham";
+
+// Distance of text in mm from inner circle
+distance_of_text = 3; // [1:5]
 
 //CUSTOMIZER VARIABLES END
 
 /* [Hidden] */
 
-$fn=100;
+// FIXME: Configurable?
+diameter_of_inner_circle = diameter_of_coin - 15;
 
-include <text_on.scad>
+$fn=100;
 
 module logo_text() {
     translate([0, 0, thickness_of_coin / 4])
     text_on_circle(
         t = text_around_coin,
-        r = diameter_of_inner_circle / 2 - 3,
+        r = diameter_of_inner_circle / 2 - distance_of_text,
         font = font_on_text,
         spacing = 1.7,
         extrusion_height = thickness_of_coin / 2,
@@ -56,31 +86,36 @@ module coin() {
     }
 }
 
-module edge_ridges() {
-    for(rotation = [0 : 30 : 330])
+module edge_notches() {
+    rotation_angle = 360 / number_of_notches;
+    last_angle = 360 - rotation_angle;
+    for(rotation = [0 : rotation_angle : last_angle])
         rotate([0, 0, rotation])
-        edge_ridge();
+        twisted_notch();
 }
 
-module edge_ridge() {
+module twisted_notch() {
     translate([diameter_of_coin / 2, 0, - thickness_of_coin / 2])
     scale([0.9, 1, 1])
     linear_extrude(height = thickness_of_coin, convexity = 1, twist = 180, slices = 100)
-    circle(d = diameter_of_ridges, $fn = 6);
+    circle(d = width_of_notches, $fn = 6);
 }
 
 module sun() {
-    len = 2;
-    h = sqrt(len * len + len/2 * len/2);
+    //height_sun_ray = sqrt(side_sun_ray * side_sun_ray + side_sun_ray/2 * side_sun_ray/2);
+    side_sun_ray = (2 * height_sun_ray) / sqrt(5);
     linear_extrude(height = thickness_of_coin / 4)
     union() {
         circle(d = diameter_of_sun, center = true);
         
-        for(rotation = [0 : 10 : 350])
+        // Triangle rays on outside of circle
+        rotation_angle = 360 / number_of_sun_rays;
+        last_angle = 360 - rotation_angle;
+        for(rotation = [0 : rotation_angle : last_angle])
             rotate([0, 0, rotation])
-            translate([diameter_of_sun / 2 + h / 2, 0, 0])
+            translate([diameter_of_sun / 2 + height_sun_ray / 2, 0, 0])
             rotate([0, 0, 135])
-            polygon(points=[[0, 0], [len, 0], [0, len]], paths = [[0, 1, 2]]);
+            polygon(points=[[0, 0], [side_sun_ray, 0], [0, side_sun_ray]], paths = [[0, 1, 2]]);
     }
 }
 
@@ -90,12 +125,15 @@ module maker_coin() {
             coin();
             
             inner_circle();
-            logo_text();
-            edge_ridges();
+            if (display_text == 1) logo_text();
+            if (display_notches == 1) edge_notches();
         }
-        sun();
-        }
+
+        if (display_sun == 1) sun();
+    }
 }
 
 maker_coin();
+
+include <text_on.scad>
 
