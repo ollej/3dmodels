@@ -7,15 +7,18 @@
 /* [Coin] */
 
 // Diameter of coin in mm
-diameter_of_coin = 50; // [30:100]
+diameter_of_coin = 50; // [30:80]
 
 // Thickness of coin in mm
-thickness_of_coin = 10; // [5:20]
+thickness_of_coin = 12; // [6:12]
 
 /* [Notches] */
 
 // Add notches on edge of coin
 display_notches = 1; // [1:Yes, 0:No]
+
+// Type of notches
+type_of_notch = 0; // [1:Twist, 0:Round]
 
 // Width in mm of each notch on edge
 width_of_notches = 10; // [5:15]
@@ -32,7 +35,7 @@ display_sun = 1; // [1:Yes, 0:No]
 diameter_of_sun = 17; // [10:25]
 
 // Height in mm of sun ray triangles
-height_sun_ray = 5; // [2:10]
+height_sun_ray = 5; // [2:8]
 
 // Number of triangle rays on sun
 number_of_sun_rays = 48; // [8:99]
@@ -91,7 +94,19 @@ module edge_notches() {
     last_angle = 360 - rotation_angle;
     for(rotation = [0 : rotation_angle : last_angle])
         rotate([0, 0, rotation])
-        twisted_notch();
+        notch();
+}
+
+module notch() {
+    if (type_of_notch == 1) twisted_notch();
+    else if (type_of_notch == 0) round_notch();
+}
+
+module round_notch() {
+    translate([diameter_of_coin / 2, 0, - thickness_of_coin / 2])
+    scale([0.9, 1, 1])
+    linear_extrude(height = thickness_of_coin)
+    circle(d = width_of_notches);
 }
 
 module twisted_notch() {
@@ -103,8 +118,9 @@ module twisted_notch() {
 
 module sun() {
     //height_sun_ray = sqrt(side_sun_ray * side_sun_ray + side_sun_ray/2 * side_sun_ray/2);
-    side_sun_ray = (2 * height_sun_ray) / sqrt(5);
-    linear_extrude(height = thickness_of_coin / 4)
+    side_sun_ray = (2 * height_sun_ray) / sqrt(height_sun_ray);
+    translate([0, 0, - thickness_of_coin / 2])
+    linear_extrude(height = thickness_of_coin - thickness_of_coin / 4)
     union() {
         circle(d = diameter_of_sun, center = true);
         
