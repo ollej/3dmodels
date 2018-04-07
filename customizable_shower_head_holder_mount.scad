@@ -7,7 +7,7 @@
 /* [Mount] */
 
 // Choose mounting option
-type_of_mount = 4; // [1:Spool, 2:Cylinder, 3:Wall mount, 4:Rod Screw Mount]
+type_of_mount = 5; // [1:Spool, 2:Cylinder, 3:Wall mount, 4:Round wall mount, 5:Rod screw mount, 6:Rod clipon mount]
 
 /* [Holder] */
 
@@ -29,10 +29,10 @@ holder_angle = 10; // [0:25]
 // Width in mm of hole in holder wall
 holder_hole_width = 16; // [10:20]
 
-/* [Wall mount] */
+/* [Mount sizes] */
 
 // Width in mm of wall mount
-width_of_mount = 55; // [45:60]
+width_of_mount = 50; // [45:60]
 
 // Height in mm of wall mount
 height_of_mount = 30; // [20:40]
@@ -40,31 +40,26 @@ height_of_mount = 30; // [20:40]
 // Depth in mm of wall mount
 depth_of_mount = 10; // [8:15]
 
+/* [Rounded edge] */
+
+// Whether to have rounded edges on mount
+use_rounded_edge = "yes"; // [yes,no]
+
 // Width in mm of rounded edge
 width_of_rounded_edge = 15; // [10:20]
 
+/* [Mount holes] */
+
+// Should screw holes be added to mount?
+use_mount_holes = "yes"; // [yes,no]
+
 // Diameter in mm of mount screw hole
-diameter_of_mount_hole = 7; // [4:10]
+diameter_of_mount_holes = 7; // [4:10]
 
 /* [Rod Screw Mount] */
 
 // Diameter in mm of rod to mount on
 diameter_of_rod = 18; // [15:25]
-
-// Width in mm of rod screw mount
-width_of_rodmount = 55; // [45:60]
-
-// Height in mm of rod screw mount
-height_of_rodmount = 25; // [20:40]
-
-// Depth in mm of rod screw mount
-depth_of_rodmount = 13; // [12:25]
-
-// Width in mm of rounded edge of rod screw mount
-width_of_rodmount_rounded_edge = 15; // [10:20]
-
-// Diameter in mm of mount screw hole
-diameter_of_mount_hole = 7; // [4:10]
 
 /* [Spool/Cylinder] */
 
@@ -122,7 +117,7 @@ module slice(r = 10, deg = 30) {
     }
 }
 
-module cutout(left_or_right) {
+module spool_cutout(left_or_right) {
     position = (width_of_spool / 2 - depth_of_cutout / 2);
     mirror([0, 0, left_or_right]) 
     rotate([0, 0, rotation_of_cutout])
@@ -139,7 +134,7 @@ module spool() {
         cylinder(h = width_of_spool - thickness_of_disks * 2, d = diameter_of_spool, center = true);
 
         // Add a cutout notch in the side of the spool
-        if (cutout_type != 0) cutout(cutout_type - 1);
+        if (cutout_type != 0) spool_cutout(cutout_type - 1);
     }
 
     // Thin center cylinder
@@ -163,7 +158,7 @@ module cylinder_mount() {
         cylinder(h = width_of_spool, d = spool_bolt_hole, center = true);
 
         // Add a cutout notch in the side of the spool
-        if (cutout_type != 0) cutout(cutout_type - 1);
+        if (cutout_type != 0) spool_cutout(cutout_type - 1);
     }
 }
 
@@ -176,12 +171,38 @@ module rounded_edge(width, depth, height, edge_scale) {
 module mount_hole(width, depth) {
     rotate([90, 0, 0])
     //translate([width_of_mount / 2 - width_of_rounded_edge / 2, 0, 0]) {
-    translate([width / 2 - diameter_of_mount_hole, 0, 0]) {
-        cylinder(h = depth, d = diameter_of_mount_hole, center = true);
+    translate([width / 2 - diameter_of_mount_holes - 1, 0, 0]) {
+        cylinder(h = depth, d = diameter_of_mount_holes, center = true);
 
         // Screw head shoulder
         translate([0, 0, depth / 4])
-        cylinder(h = depth / 2, d = diameter_of_mount_hole * 1.5, center = true);
+        cylinder(h = depth / 2, d = diameter_of_mount_holes * 2, center = true);
+    }
+}
+
+module screw_holes() {
+    if (use_mount_holes == "yes") {
+        mount_hole(width_of_mount, depth_of_mount);
+        mirror([1, 0, 0]) mount_hole(width_of_mount, depth_of_mount);
+    }
+}
+
+module rounded_edges(height) {
+    if (use_rounded_edge == "yes") {
+        rounded_edge(width_of_mount, depth_of_mount, height, 0.25);
+        mirror([1, 0, 0]) rounded_edge(width_of_mount, depth_of_mount, height, 0.25);
+    }
+}
+
+module round_wall_mount() {
+    translate([0 - depth_of_mount / 2 - 1, 0, 2])
+    rotate([0, 0, 90])
+    difference() {
+        rotate([90, 0, 0])
+        cylinder(d = width_of_mount, h = depth_of_mount, center = true);
+
+        rounded_edges(width_of_mount);
+        screw_holes();
     }
 }
 
@@ -190,37 +211,47 @@ module wall_mount() {
     rotate([0, 0, 90])
     difference() {
         cube([width_of_mount, depth_of_mount, height_of_mount], center = true);
-        rounded_edge(width_of_mount, depth_of_mount, height_of_mount, 0.25);
-        mirror([1, 0, 0]) rounded_edge(width_of_mount, depth_of_mount, height_of_mount, 0.25);
 
-        // Screw holes
-        mount_hole(width_of_mount, depth_of_mount);
-        mirror([1, 0, 0]) mount_hole(width_of_mount, depth_of_mount);
+        rounded_edges(height_of_mount);
+        screw_holes();
     }
 }
 
+module rod_hole() {
+    cylinder(h = height_of_mount, d = diameter_of_rod, center = true);
+}
+
 module rod_screw_plate() {
-    translate([0 - depth_of_rodmount / 2, 0, 2])
+    translate([0 - depth_of_mount / 2, 0, 2])
     rotate([0, 0, 90])
     difference() {
-        cube([width_of_rodmount, depth_of_rodmount, height_of_rodmount], center = true);
-        rounded_edge(width_of_rodmount, depth_of_rodmount, height_of_rodmount, 0.5);
-        mirror([1, 0, 0]) rounded_edge(width_of_rodmount, depth_of_rodmount, height_of_rodmount, 0.5);
+        cube([width_of_mount, depth_of_mount, height_of_mount], center = true);
 
-        // Screw holes
-        mount_hole(width_of_rodmount, depth_of_rodmount);
-        mirror([1, 0, 0]) mount_hole(width_of_rodmount, depth_of_rodmount);
-
-        // Rod hole
-        translate([0, depth_of_rodmount / 2, 0])
-        cylinder(h = height_of_rodmount, d = diameter_of_rod, center = true);
+        rounded_edges(height_of_mount);
+        screw_holes();
+        translate([0, depth_of_mount / 2, 0])
+        rod_hole();
     }
 }
 
 module rod_screw_mount() {
     rod_screw_plate();
-    translate([0, 0, height_of_rodmount + 10])
+    translate([0, 0, height_of_mount + 10])
         rod_screw_plate();
+}
+
+module rod_clipon_mount() {
+    depth = diameter_of_rod + 10;
+    translate([0 - depth / 2, 0, 2])
+    rotate([0, 0, 90])
+    difference() {
+        translate([-2, 0, 0])
+        cube([depth - 5, depth, height_of_mount], center = true);
+
+        translate([depth / 4, 0, 0])
+        cube([depth / 2, diameter_of_rod * 0.9, height_of_mount], center = true);
+        rod_hole();
+    }
 }
 
 module holder() {
@@ -250,7 +281,9 @@ module mount() {
     if (type_of_mount == 1) spool_mount();
     else if (type_of_mount == 2) cylinder_mount();
     else if (type_of_mount == 3) wall_mount();
-    else rod_screw_mount();
+    else if (type_of_mount == 4) round_wall_mount();
+    else if (type_of_mount == 5) rod_screw_mount();
+    else if (type_of_mount == 6) rod_clipon_mount();
 }
 
 module shower_holder() {
