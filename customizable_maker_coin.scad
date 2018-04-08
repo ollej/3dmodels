@@ -59,7 +59,7 @@ inner_text = "OLLEJ";
 font_on_inner_text = "Gotham";
 
 // Size of inner text
-size_of_inner_text = 5; // [10:30]
+size_of_inner_text = 5; // [1:15]
 
 /* [Inner image] */
 
@@ -76,6 +76,9 @@ text_around_coin = "Exalted Printing";
 
 // Font to use on the circle text
 font_on_circle_text = "Gotham";
+
+// Rotation angle in degrees of circle text
+rotation_of_circle_text = 100; // [0:360]
 
 // Distance of text in mm from inner circle
 distance_of_text = 3; // [1:5]
@@ -107,7 +110,7 @@ module circle_text() {
         font = font_on_circle_text,
         spacing = 1.7,
         extrusion_height = thickness_of_coin / 2,
-        rotate = 100,
+        rotate = rotation_of_circle_text,
         center = true);
 }
 
