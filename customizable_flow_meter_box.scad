@@ -5,10 +5,10 @@
 //CUSTOMIZER VARIABLES
 
 // Width of the box in mm
-width_of_box = 100; // [40:200]
+width_of_box = 200; // [40:300]
 
 // Length of the box in mm
-length_of_box = 80; // [40:200]
+length_of_box = 150; // [40:200]
 
 // Height of the box in mm
 height_of_box = 30; // [20:200]
@@ -19,8 +19,20 @@ thickness = 3; // [3:6]
 // Radius in mm of rounded corners
 corner_radius = 3; // [1:5]
 
+// Angle in degrees of box top
+angle_of_box_top = 60; // [0:85]
+
+// Y offset in mm from center of displayotron
+y_offset_displayotron = 40; // [0:100]
+
 // Diameter in mm of vote buttons
 diameter_of_vote_buttons = 60; // [20:100]
+
+// X offset (negative) in mm of vote buttons from center
+x_offset_vote_buttons = 40; // [0:20]
+
+// Y offset in mm of vote buttons from center
+y_offset_vote_buttons = 25; // [0:20]
 
 left_distance_of_usb = 20;
 
@@ -44,25 +56,45 @@ module rectangle_rounded(width, height, radius=1) {
 /* ** Partials ** */
 
 module main_box() {
-    // Base
-    linear_extrude(height = thickness)
-    rectangle_rounded(width_of_box, length_of_box, corner_radius);
+    // Top
+    rotate([angle_of_box_top, 0, 0])
+    translate([0, 0, height_of_box]) {
+        box_top();
+    }
 
     // Walls
-    translate([0, 0, thickness]) {
-        linear_extrude(height_of_box - thickness) {
-            difference() {
-                rectangle_rounded(width_of_box, length_of_box, corner_radius);
-                rectangle_rounded(width_of_box - thickness, length_of_box - thickness, corner_radius);
-            }
+/*
+    linear_extrude(height_of_box) {
+        difference() {
+            rectangle_rounded(width_of_box, length_of_box, corner_radius);
+            rectangle_rounded(width_of_box - thickness, length_of_box - thickness, corner_radius);
         }
+    }
+*/
+}
+
+module box_top() {
+    linear_extrude(height = thickness)
+    difference() {
+        rectangle_rounded(width_of_box, length_of_box, corner_radius);
+
+        displayotron();
+        vote_buttons();
     }
 }
 
+module bottom_lid() {
+    // Base
+    linear_extrude(height = thickness)
+    rectangle_rounded(width_of_box, length_of_box, corner_radius);
+    // TODO: Add ridge
+    // TODO: Add latches
+}
+
 module vote_buttons() {
-    translate([])
+    translate([- x_offset_vote_buttons, - y_offset_vote_buttons, 0])
     circle(d = diameter_of_vote_buttons);
-    translate([])
+    translate([x_offset_vote_buttons, - y_offset_vote_buttons, 0])
     circle(d = diameter_of_vote_buttons);
 }
 
@@ -72,6 +104,7 @@ module control_buttons() {
 module displayotron() {
     displayotron_width = 56;
     displayotron_height = 30;
+    translate([0, y_offset_displayotron, 0])
     rectangle_rounded(displayotron_width, displayotron_height);
 }
 
@@ -88,8 +121,6 @@ module flow_meter_box() {
     difference() {
         main_box();
         
-        displayotron();
-        vote_buttons();
         control_buttons();
         USB();
     }
