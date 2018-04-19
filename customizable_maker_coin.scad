@@ -250,4 +250,182 @@ module maker_coin() {
 maker_coin();
 
 // Placed last to preserve line numbers when debugging.
-include <text_on.scad>
+//include <text_on.scad>
+
+// ** Include text_on.scad inline to work on Thingiverse ** */
+
+/*  text on ....
+    This is a rework of version 3 of write.scad to use the new OpenSCAD internal text() primitive.
+    All credit to Harlan Martin (harlan@sutlog.com) for his great effort on the original.
+    Great thanks to t-paul (and the OpenSCAD dev team) on adding the new text() primitive.
+*/
+
+// Defaults
+// Defaults for all modules
+default_t = "text_on";
+default_size = 4; // TODO - Can we make this 10?? To match internal size? There is an underlying value in text() -- This masks that.
+default_font = "Liberation Mono";
+default_spacing = 1; // Spacing between characters. There is an underlying value in text() -- This masks that. We try and match it here.
+default_rotate = 0; // text rotation (clockwise)
+default_center = true; //Text-centering
+default_scale = [1,1,1];
+default_extrusion_height = 2; //mm letter extrusion height
+
+//Defaults for Cube
+default_cube_face = "front"; // default face (top,bottom,left,right,back,front)
+default_sphere_rounded = false; // default for rounded letters on text_on_sphere
+default_cube_updown = 0; // mm up (-down) from center on face of cube
+default_cube_rightleft = 0; // mm right(-left) from center on face of cube
+
+//Defaults for Sphere
+default_sphere_northsouth = 0;
+default_sphere_eastwest = 0;
+default_sphere_spin = 0; // TODO:Different to rotate? or up/down. Better name?
+
+//Defaults for Cylinder (including circle as it is on top/bottom)
+default_circle_middle = 0; // (mm toward middle of circle)
+default_circle_ccw = false; // write on top or bottom in a ccw direction
+default_circle_eastwest = 0;
+default_cylinder_face = "side";
+default_cylinder_updown = 0;
+
+// Internal values - don't play with these :)
+// This is much more accurate than the PI constant internal to Openscad.
+internal_pi = 3.1415926535897932384626433832795028841971693993751058209;
+internal_pi2 = internal_pi * 2;
+
+// Internal values - You might want to play with these if you are using a proportional font
+internal_space_fudge = 0.80; // Fudge for working out lengths (widths) of strings
+
+debug = true;
+
+function width_of_text_char(size, spacing) = size * internal_space_fudge * spacing;
+function width_of_text_string_num_length(length, size, spacing) = width_of_text_char(size, spacing) * length;
+//function width_of_text_string(t, size, spacing) = width_of_text_string_num_length(len(t), size, spacing);
+
+//Rotate 1/2 width of text if centering    
+//One less -- if we have a single char we are already centred..
+function rotation_for_center_text_string(t, size, spacing, r, rotate, center) = (center) ? (width_of_text_string_num_length(len(t) - 1, size, spacing) / 2 / (internal_pi2 * r) * 360) : 0;
+
+//Angle that measures width of letters on perimeter of a circle (and sphere and cylinder)
+function rotation_for_character(size, spacing, r, rotate = 0) = (width_of_text_char( size, spacing ) / (internal_pi2 * r)) * 360 * (1 - abs(rotate) / 90);
+
+function default_if_undef(val, default_val) = (val != undef) ? val : default_val;
+
+
+module text_on_circle(t = default_t,
+                      //Object-specific
+                      locn_vec = [0, 0, 0],
+                      r,
+                      eastwest = default_circle_eastwest,
+                      middle = default_circle_middle,
+                      ccw = default_circle_ccw,
+
+                      //All objects                      
+                      extrusion_height = default_extrusion_height,
+                      rotate = default_rotate,
+                      center = default_center,
+                      
+                      //All objects -- arguments as for text()
+                      font = undef,
+                      size = default_size,
+                      direction = undef,
+                      halign = undef,
+                      valign = undef,
+                      language = undef,
+                      script = undef,
+                      spacing = default_spacing) {
+//    echo (str("text_on_circle:","There are " ,len(t) ," letters in t" , t));
+//    echo (str("text_on_circle:","rotate=" , rotate));
+//    echo (str("text_on_circle:","eastwest=" , eastwest));
+
+    if((halign != undef) || (halign != undef)) {
+        echo(str("text_on_circle:","WARNING " , "halign and valign are NOT supported."));
+    }
+
+    ccw_sign = (ccw == true) ? 1 : -1;
+    rtl_sign = (direction == "rtl") ? -1 : 1;
+    ttb_btt_inaction = (direction == "ttb" || direction == "btt") ? 0 : 1;
+    rotate_z_outer = -rotate + ccw_sign * eastwest;
+    rotate_z_inner = -rtl_sign * ccw_sign * ttb_btt_inaction * rotation_for_center_text_string(t, size, spacing, r-middle, rotate, center);
+    rotate(rotate_z_outer, [0, 0, 1] )
+    rotate(rotate_z_inner, [0, 0, 1] )
+    translate(locn_vec)
+    for(l = [0 : len(t) - 1]) {
+        //TTB/BTT means no per letter rotation
+        rotate_z_inner2 = -ccw_sign * 90 + ttb_btt_inaction * rtl_sign * ccw_sign * l * rotation_for_character(size, spacing, r - middle, rotate = 0);   //Bottom out=-270+r
+        //TTB means we go toward center, BTT means away
+        vert_x_offset = (direction == "ttb" || direction == "btt") ? (l * size * ((direction == "btt") ? -1 : 1)) : 0;
+        rotate(rotate_z_inner2, [0, 0, 1])
+        translate([r - middle - vert_x_offset, 0, 0])
+        rotate(-ccw_sign * 270, [0, 0, 1]) // flip text (botom out = -270)
+        text_extrude(t[l],
+                center = true,
+                font = font,
+                size = size,
+                rotate = undef,
+                spacing = spacing,
+                direction = undef, //We don't pass direction ( misaligns inside text() ). TODO: Investigate why
+                language = language,
+                script = script,
+                halign = halign,
+                valign = valign,
+                extrusion_height = extrusion_height);
+    }
+}
+
+// Print a single character or a string at the desired extrusion height
+// Passes on values to text() that are passed in
+// TODO: Add x,y,z rotations get text facing the right way from the start)
+module text_extrude( t = default_t,
+                     extrusion_height = default_extrusion_height,
+                     center = default_center, // Fudgy. YMMV. // TODO:center_extrusion, or extrusion offset??
+                     rotate = default_rotate,
+                     scale = default_scale, // For scaling by different on axes (for widening etc)
+                     // Following are test() params (in addition to t=)
+                     font = default_font,
+                     size = default_size,
+                     direction = undef,
+                     halign  = undef,
+                     valign = undef,
+                     language = undef,
+                     script = undef,
+                     spacing = default_spacing) {
+    //echo (str("text_extrude:","There are " ,len(t) ," letters in text" , t));
+    //echo (str("text_extrude:","extrusion_height=" , extrusion_height));
+    
+    if(center == true) {
+        if((halign != undef) || (valign != undef)) {
+            echo(str("text_extrude:","WARNING " , "When center is true, then halign and valign are NOT supported."));
+        }
+    }
+    
+    // As arguments are explicitly set as undef (from higher functions) as they come down (they don't get defaults in this function as they are set as something)
+    // we need to check and replace any that we don't want to be undef
+    t = default_if_undef(t, default_t);
+    font = default_if_undef(font, default_font);
+    extrusion_height = default_if_undef(extrusion_height, default_extrusion_height);
+    center = default_if_undef(center, default_center);
+    rotate = default_if_undef(rotate, default_rotate);
+    spacing = default_if_undef(spacing, default_spacing);
+    size = default_if_undef(size, default_size);
+    
+    halign = (center) ? "center" : halign ;
+    valign = (center) ? "center" : valign ;
+    extrusion_center = (center) ? true : false ;
+    
+    scale(scale)
+    rotate(rotate, [0, 0, -1]) //TODO: Do we want to make this so that the entire vector can be set?
+    linear_extrude(height = extrusion_height, convexity = 10, center = extrusion_center)
+    text(text = t,
+            size = size,
+            $fn = 40,
+            font = font,
+            direction = direction,
+            spacing = spacing,
+            halign = halign,
+            valign = valign,
+            language = language,
+            script = script);
+}
+
