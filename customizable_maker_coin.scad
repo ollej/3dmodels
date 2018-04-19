@@ -56,7 +56,7 @@ number_of_sun_rays = 48; // [8:99]
 inner_text = "OLLEJ";
 
 // Font to use on the inner text
-font_on_inner_text = "Gotham";
+font_on_inner_text = "Helvetica";
 
 // Size of inner text
 size_of_inner_text = 5; // [1:15]
@@ -75,7 +75,7 @@ display_circle_text = "yes"; // [yes, no]
 text_around_coin = "Exalted Printing";
 
 // Font to use on the circle text
-font_on_circle_text = "Gotham";
+font_on_circle_text = "Helvetica";
 
 // Rotation angle in degrees of circle text
 rotation_of_circle_text = 100; // [0:360]
