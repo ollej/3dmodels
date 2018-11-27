@@ -23,6 +23,9 @@ thickness_of_wall = 5; // [2:0.1:10]
 // Type of hour symbols
 type_of_hours = "Rotated numbers"; // [None, Numbers, Rotated numbers, Text]
 
+// Raise or cutout hours
+raise_hours = "Raise"; // [Raise, Cutout]
+
 // Height in mm of numbers
 height_of_numbers = 2; // [0.5:0.1:4]
 
@@ -93,7 +96,7 @@ module circled_pattern(number) {
         children();
 }
 
-/* ** Main object ** */
+/* ** Clock base ** */
 
 module center_hole() {
     cylinder(h=height, d=diameter_of_hole);
@@ -105,12 +108,21 @@ module backside() {
         d=diameter_of_clock  - thickness_of_wall * 2);
 }
 
-module clock_face() {
+module clock_base() {
     difference() {
         cylinder(h=height, d=diameter_of_clock);
         
         center_hole();
         backside();
+    }
+}
+
+/* ** Clock face ** */
+
+module clock_face() {
+    union() {
+        hours();
+        if (show_dots == "yes") dots();
     }
 }
 
@@ -156,11 +168,21 @@ module dots() {
     }
 }
 
+/* ** Main object ** */
+
 module clock() {
-    union() {
-        clock_face();
-        hours();
-        if (show_dots == "yes") dots();
+    if (raise_hours == "Raise") {
+        union() {
+            clock_base();
+            clock_face();
+        }
+    } else {
+        difference() {
+            clock_base();
+            
+            translate([0, 0, -height_of_numbers])
+            clock_face();
+        }
     }
 }
 
