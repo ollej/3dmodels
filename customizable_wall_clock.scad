@@ -18,6 +18,9 @@ diameter_of_hole = 4.0; // [3.0:0.1:10.0]
 // Thickness in mm of walls
 thickness_of_wall = 5; // [2:0.1:10]
 
+// Width in mm of chamfer of clock edge
+width_of_chamfer = 0; // [0:0.1:10]
+
 /* [Hours] */
 
 // Type of hour symbols
@@ -27,16 +30,16 @@ type_of_hours = "Rotated numbers"; // [None, Numbers, Rotated numbers, Text]
 raise_hours = "Raise"; // [Raise, Cutout]
 
 // Height in mm of numbers
-height_of_numbers = 2; // [0.5:0.1:4]
+height_of_hours = 2; // [0.5:0.1:4]
 
 // Distance in mm of numbers from edge
-distance_of_numbers = 5; // [5:20]
+distance_of_hours = 5; // [5:20]
 
 // Font size of numbers
-size_of_numbers = 12; // [5:20]
+size_of_hours = 12; // [5:20]
 
 // Font of hour numbers
-font_of_hour_numbers = "Gotham";
+font_of_hours = "Gotham";
 
 /* [Hour dots] */
 
@@ -68,7 +71,7 @@ text_hour_twelve = "tolv";
 
 /* [Hidden] */
 
-$fn=120;
+$fn=30;
 
 positions = [ for(angle = [30 : 30 : 360]) angle ];
 hours = [
@@ -110,7 +113,10 @@ module backside() {
 
 module clock_base() {
     difference() {
-        cylinder(h=height, d=diameter_of_clock);
+        hull() {
+            cylinder(h=height, d=diameter_of_clock - width_of_chamfer);
+            cylinder(h=height - width_of_chamfer, d=diameter_of_clock);
+        }
         
         center_hole();
         backside();
@@ -135,36 +141,36 @@ module hours() {
 module hours_rotated_numbers() {
     for (hour = [1:12]) {
         rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_numbers, 0, height])
+        translate([diameter_of_clock / 2  - distance_of_hours, 0, height])
         rotate([0, 0, 270])
-        linear_extrude(height_of_numbers)
-        text(str(hour), size = size_of_numbers, font = font_of_hour_numbers, halign = "center", valign = "top");
+        linear_extrude(height_of_hours)
+        text(str(hour), size = size_of_hours, font = font_of_hours, halign = "center", valign = "top");
     }
 }
 
 module hours_numbers() {
     for (hour = [1:12]) {
         rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_numbers - size_of_numbers * 0.75, 0, height])
+        translate([diameter_of_clock / 2  - distance_of_hours - size_of_hours * 0.75, 0, height])
         rotate([0, 0, 270 + positions[hour - 1]])
-        linear_extrude(height_of_numbers)
-        text(str(hour), size = size_of_numbers, font = font_of_hour_numbers, halign = "center", valign = "center");
+        linear_extrude(height_of_hours)
+        text(str(hour), size = size_of_hours, font = font_of_hours, halign = "center", valign = "center");
     }
 }
 
 module hours_text() {
     for (hour = [1:12]) {
         rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_numbers, 0, height])
-        linear_extrude(height_of_numbers)
-        text(hours[hour - 1], size = size_of_numbers, font = font_of_hour_numbers, halign = "right", valign = "center");
+        translate([diameter_of_clock / 2  - distance_of_hours, 0, height])
+        linear_extrude(height_of_hours)
+        text(hours[hour - 1], size = size_of_hours, font = font_of_hours, halign = "right", valign = "center");
     }
 }
 
 module dots() {
     circled_pattern(12) {
         translate([diameter_of_clock / 2 - distance_of_dots - diameter_of_dots / 2, 0, height])
-        cylinder(h = height_of_numbers, d=diameter_of_dots);
+        cylinder(h = height_of_hours, d=diameter_of_dots);
     }
 }
 
@@ -180,7 +186,7 @@ module clock() {
         difference() {
             clock_base();
             
-            translate([0, 0, -height_of_numbers])
+            translate([0, 0, -height_of_hours])
             clock_face();
         }
     }
