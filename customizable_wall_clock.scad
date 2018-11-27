@@ -21,10 +21,7 @@ thickness_of_wall = 5; // [2:0.1:10]
 /* [Hours] */
 
 // Type of hour symbols
-type_of_hours = "Rotated numbers"; // [Dots, Numbers, Rotated numbers, Text]
-
-// Diameter in mm of hour dots
-diameter_of_dots = 10; // [2:20]
+type_of_hours = "Rotated numbers"; // [None, Numbers, Rotated numbers, Text]
 
 // Height in mm of numbers
 height_of_numbers = 2; // [0.5:0.1:4]
@@ -33,10 +30,21 @@ height_of_numbers = 2; // [0.5:0.1:4]
 distance_of_numbers = 5; // [5:20]
 
 // Font size of numbers
-size_of_numbers = 15; // [5:20]
+size_of_numbers = 12; // [5:20]
 
 // Font of hour numbers
 font_of_hour_numbers = "Gotham";
+
+/* [Hour dots] */
+
+// Show dots for each hour
+show_dots = "yes"; // [yes, no]
+
+// Diameter in mm of hour dots
+diameter_of_dots = 5; // [2:20]
+
+// Distance in mm of dots from clock edge
+distance_of_dots = 25; // [5:40]
 
 /* [Hour texts] */
 
@@ -52,7 +60,6 @@ text_hour_nine = "nio";
 text_hour_ten = "tio";
 text_hour_eleven = "elva";
 text_hour_twelve = "tolv";
-
 
 //CUSTOMIZER VARIABLES END
 
@@ -108,8 +115,7 @@ module clock_face() {
 }
 
 module hours() {
-    if (type_of_hours == "Dots") hours_dots();
-    else if (type_of_hours == "Numbers") hours_numbers();
+    if (type_of_hours == "Numbers") hours_numbers();
     else if (type_of_hours == "Rotated numbers") hours_rotated_numbers();
     else if (type_of_hours == "Text") hours_text();
 }
@@ -143,9 +149,9 @@ module hours_text() {
     }
 }
 
-module hours_dots() {
+module dots() {
     circled_pattern(12) {
-        translate([diameter_of_clock / 2 - distance_of_numbers - diameter_of_dots / 2, 0, height])
+        translate([diameter_of_clock / 2 - distance_of_dots - diameter_of_dots / 2, 0, height])
         cylinder(h = height_of_numbers, d=diameter_of_dots);
     }
 }
@@ -154,6 +160,7 @@ module clock() {
     union() {
         clock_face();
         hours();
+        if (show_dots == "yes") dots();
     }
 }
 
