@@ -15,6 +15,8 @@ backplate_shape = "T shape"; // [T shape, V shape, Rectangle]
 probe_hole_diameter = 12;
 probe_mount_thickness = 5;
 probe_mount_diameter = 22;
+
+type_of_mount_hole = "Teardrop"; // [Teardrop, Round]
 mount_hole_diameter = 3;
 mount_hole_distance = 10;
 
@@ -23,6 +25,17 @@ mount_hole_distance = 10;
 /* [Hidden] */
 
 $fn=120;
+
+/* From http://www.thingiverse.com/thing:3457
+   © 2010 whosawhatsis */
+module teardrop(radius, length, angle) {
+	rotate([0, angle, 0]) union() {
+		linear_extrude(height = length, center = true, convexity = radius, twist = 0)
+			circle(r = radius, center = true, $fn = 30);
+		linear_extrude(height = length, center = true, convexity = radius, twist = 0)
+			projection(cut = false) rotate([0, -angle, 0]) translate([0, 0, radius * sin(45) * 1.5]) cylinder(h = radius * sin(45), r1 = radius * sin(45), r2 = 0, center = true, $fn = 30);
+    }
+}
 
 module cylinder_outer(height, diameter, fn) {
    fudge = 1 / cos(180 / fn);
@@ -36,14 +49,30 @@ module cube_rounded(width, height, thickness, radius=1) {
 	}
 }
 
+module round_hole() {
+    rotate([90, 0, 0])
+    cylinder_outer(backplate_thickness, mount_hole_diameter, $fn);
+}
+
+module teardrop_hole() {
+    rotate([0, 0, 90])
+    teardrop(mount_hole_diameter/2, backplate_thickness, 90);
+}
+
+module mount_hole() {
+    if (type_of_mount_hole == "Teardrop") {
+        teardrop_hole();
+    } else {
+        round_hole();
+    }
+}
+
 module mount_holes() {
     translate([mount_hole_distance, 0, backplate_height/2 - backplate_bracket_height/2])
-        rotate([90, 0, 0])
-        cylinder_outer(backplate_thickness, mount_hole_diameter, $fn);
+        mount_hole();
     
     translate([-mount_hole_distance, 0, backplate_height/2 - backplate_bracket_height/2])
-        rotate([90, 0, 0])
-        cylinder_outer(backplate_thickness, mount_hole_diameter, $fn);
+        mount_hole();
 }
 
 module backplate_rectangle() {
