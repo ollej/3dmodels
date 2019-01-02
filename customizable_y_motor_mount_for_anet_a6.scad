@@ -8,7 +8,10 @@
 backplate_thickness = 6; // [4:10]
 
 // Distance in mm that motor is lowered from default
-motor_lowered_by = 2; // [0:0.1:4]
+motor_lowered_by = 1; // [0:0.1:4]
+
+// Width in mm of hole for back frame brace
+width_of_opening_for_back_frame_brace = 10.5; // [0:15]
 
 // Use round or teardrop mount holes
 type_of_mount_hole = "Teardrop"; // [Teardrop, Round]
@@ -19,11 +22,14 @@ mount_hole_diameter = 3; // [2:0.1:4]
 // Length in mm of mount hole
 mount_hole_length = 12; // [8:0.1:14]
 
-depth_of_trapped_nut_hole = 2.6;
+// Depth in mm of hole for trapped nut
+depth_of_trapped_nut_hole = 2.6; // [2:0.1:4]
 
-width_of_trapped_nut_hole = 7;
+// Width in mm of hole for trapped nut
+width_of_trapped_nut_hole = 7.5; // [6:0.1:10]
 
-height_of_trapped_nut_hole = 5.4;
+// Height in mm of hole for trapped nut
+height_of_trapped_nut_hole = 5.5; // [4:0.1:8]
 
 //CUSTOMIZER VARIABLES END
 
@@ -67,24 +73,24 @@ module motor_mount_plate() {
         // Motor shaft hole
         translate([6/3, 0, height_of_base/2])
         rotate([90, 0, 0])
-        cylinder_outer(23, 8, $fn);
+        cylinder_outer(23, 8 + 0.1, $fn);
         
         // Motor mount holes
         translate([6/3 - 31/2, 0, height_of_base/2 + 31/2])
         rotate([90, 90, 0])
-        mount_hole(mount_hole_diameter, 8, $fn);
+        mount_hole(mount_hole_diameter, 8 + 0.1, $fn);
         
         translate([6/3 - 31/2, 0, height_of_base/2 - 31/2])
         rotate([90, 90, 0])
-        mount_hole(mount_hole_diameter, 8, $fn);
+        mount_hole(mount_hole_diameter, 8 + 0.1, $fn);
         
         translate([6/3 + 31/2, 0, height_of_base/2 + 31/2])
         rotate([90, 90, 0])
-        mount_hole(mount_hole_diameter, 8, $fn);
+        mount_hole(mount_hole_diameter, 8 + 0.1, $fn);
  
         translate([6/3 + 31/2, 0, height_of_base/2 - 31/2])
         rotate([90, 90, 0])
-        mount_hole(mount_hole_diameter, 8, $fn);
+        mount_hole(mount_hole_diameter, 8 + 0.1, $fn);
    }    
 }
 
@@ -95,6 +101,12 @@ module bottom_plate() {
 
         translate([0, 0, -4])
         cube([51, 31, 8], center=true);
+        
+        // Leave opening for back frame brace
+        if (width_of_opening_for_back_frame_brace > 0) {
+            translate([51/2 - width_of_opening_for_back_frame_brace/2, 8/2 - 47/2, -4])
+            cube([width_of_opening_for_back_frame_brace, 8, 8], center=true);
+        }  
     }
 }
 
@@ -110,15 +122,15 @@ module back_plate() {
 }
 
 module backplate_mount_holes() {
-    translate([backplate_thickness, 4, 10])
+    translate([mount_hole_length/2 - 0.1, 4, 10])
     rotate([0, 90, 0])
-    %mount_hole(mount_hole_diameter, mount_hole_length);
+    mount_hole(mount_hole_diameter, mount_hole_length);
     
     // Trapped nut hole
     translate([backplate_thickness, width_of_trapped_nut_hole/2, 10])
     cube([depth_of_trapped_nut_hole, width_of_trapped_nut_hole, height_of_trapped_nut_hole], center=true);
 
-    translate([backplate_thickness, 47-4, 10])
+    translate([mount_hole_length/2 - 0.1, 47-4, 10])
     rotate([0, 90, 0])
     mount_hole(mount_hole_diameter, mount_hole_length);
 
@@ -126,7 +138,7 @@ module backplate_mount_holes() {
     translate([backplate_thickness, 47 - width_of_trapped_nut_hole/2, 10])
     cube([depth_of_trapped_nut_hole, width_of_trapped_nut_hole, height_of_trapped_nut_hole], center=true);
 
-    translate([backplate_thickness, 47-4, 39])
+    translate([mount_hole_length/2 - 0.1, 47-4, 39])
     rotate([0, 90, 0])
     mount_hole(mount_hole_diameter, mount_hole_length);
     
