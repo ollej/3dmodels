@@ -21,7 +21,7 @@ bracket_width = 45;
 bracket_depth = 14;
 
 // Thickness in mm of bracket
-bracket_thickness = 3;
+bracket_thickness = 4;
 
 // Radius in mm of bracket corners
 bracket_corner_radius = 3; // [1:0.5:5]
@@ -31,6 +31,9 @@ mount_hole_diameter = 3;
 
 // Distance in mm between mount screw holes
 mount_hole_distance = 31;
+
+// Position of trapped nut
+trapped_nut_position = 0; // [180:Left, 0:Right]
 
 // Distance in mm from edge to center of mount hole
 mount_hole_distance_from_edge = 7;
@@ -159,9 +162,9 @@ module gopro_arm(width, length) {
     ]);
 }
 
-module gopro_mount(bracket_depth, bracket_thickness) {
+module gopro_mount(bracket_depth, bracket_thickness, angle) {
     translate([0, - gopro_size / 2 - bracket_depth / 2, gopro_size / 2 - bracket_thickness / 2])
-    rotate([0, 0, 90])
+    rotate([angle, 0, 90])
     mount3();
 
     translate([-10.5, bracket_depth / 2, - bracket_thickness / 2])
@@ -175,7 +178,7 @@ module gopro_bracket() {
 
             translate([0, - abs(gopro_angle) / 6, 0])
             rotate([0, 0, gopro_angle])
-            gopro_mount(bracket_depth, bracket_thickness);
+            gopro_mount(bracket_depth, bracket_thickness, trapped_nut_position);
         }
 
         // Z axis cutout
