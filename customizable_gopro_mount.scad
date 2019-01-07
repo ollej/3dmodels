@@ -14,6 +14,9 @@
 // Angle of GoPro mount
 gopro_angle = 0; // [-25:25]
 
+// Distance in mm of GoPro mount
+gopro_distance = 0; // [0:0.2:5]
+
 // Width in mm of bracket
 bracket_width = 45;
 
@@ -176,7 +179,7 @@ module gopro_bracket() {
         union() {
             mount_bracket(bracket_width, bracket_depth, bracket_thickness, bracket_corner_radius, mount_hole_diameter, mount_hole_distance, mount_hole_distance_from_edge);
 
-            translate([0, - abs(gopro_angle) / 6, 0])
+            translate([0, -gopro_distance, 0])
             rotate([0, 0, gopro_angle])
             gopro_mount(bracket_depth, bracket_thickness, trapped_nut_position);
         }
