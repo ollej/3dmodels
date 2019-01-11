@@ -6,6 +6,9 @@
 
 /* [Clock] */
 
+// Which part to render
+part = "Complete"; // [Complete, Base, Face]
+
 // Height in mm of clock face
 height_of_clock = 5; // [5:50]
 
@@ -32,11 +35,11 @@ raise_hours = "Raise"; // [Raise, Inset]
 // Rotate hours
 rotation_of_hours = "None"; // [None, Rotated, Angled]
 
-// Height in mm of numbers
+// Height in mm of hour numbers and markers
 height_of_hours = 2; // [0.5:0.1:4]
 
-// Distance in mm of numbers from edge
-distance_of_hours = 5; // [5:20]
+// Distance in mm of hour numbers from edge
+distance_of_hours = 12; // [5:20]
 
 // Font size of numbers
 size_of_hours = 12; // [5:20]
@@ -50,13 +53,13 @@ font_of_hours = "Gotham";
 type_of_hour_markers = "Circle"; // [None, Circle, Line, Triangle In, Triangle Out]
 
 // Width in mm of hour markers
-width_of_markers = 5; // [1:20]
+width_of_markers = 6; // [1:20]
 
 // Height (or diameter) in mm of hour markers
-height_of_markers = 10; // [1:20]
+height_of_markers = 6; // [1:20]
 
 // Distance in mm of markers from clock edge
-distance_of_markers = 25; // [5:80]
+distance_of_markers = 42; // [5:80]
 
 /* [Hour texts] */
 
@@ -101,6 +104,7 @@ roman_numerals = [
 
 function hour_text(hour) = hours_text[hour - 1];
 function hour_roman(hour) = roman_numerals[hour - 1];
+function hour_number(hour) = str(hour);
 
 /* ** Utility modules ** */
 
@@ -138,10 +142,11 @@ module clock_base() {
 
 /* ** Clock face ** */
 
-function rotation_angle(hour) = (rotation_of_hours == "None")
-    ? 270 + positions[hour - 1]
-    : (rotation_of_hours == "Rotated")
-        ? 270 : 0;
+function rotation_angle(hour) = 
+    (rotation_of_hours == "None")
+        ? 270 + positions[hour - 1]
+        : (rotation_of_hours == "Rotated")
+            ? 270 : 0;
 
 module clock_face() {
     union() {
@@ -152,10 +157,10 @@ module clock_face() {
 
 module hour_text(hour, size, font) {
     if (type_of_hours == "Roman")
-        text(roman_numerals[hour - 1], size = size, font = font, halign = "center", valign = "center");
+        text(hour_roman(hour), size = size, font = font, halign = "center", valign = "center");
     else if (type_of_hours == "Text")
         text(hour_text(hour), size = size, font = font, halign = "center", valign = "center");
-    else text(str(hour), size = size, font = font, halign = "center", valign = "center");
+    else text(hour_number(hour), size = size, font = font, halign = "center", valign = "center");
 }
 
 module hours() {
@@ -197,6 +202,7 @@ module hour_markers() {
 
 /* ** Main object ** */
 
+// TODO: Support inset color
 module clock() {
     if (raise_hours == "Raise") {
         union() {
@@ -213,4 +219,14 @@ module clock() {
     }
 }
 
-clock();
+module print_part() {
+	if (part == "Complete") {
+		clock();
+	} else if (part == "Base") {
+		clock_base();
+	} else if (part == "Face") {
+		clock_face();
+	}
+}
+
+print_part();
