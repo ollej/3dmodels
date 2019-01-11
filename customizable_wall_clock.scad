@@ -6,8 +6,8 @@
 
 /* [Clock] */
 
-// Height in mm
-height = 5; // [5:50]
+// Height in mm of clock face
+height_of_clock = 5; // [5:50]
 
 // Diameter in mm of clock face
 diameter_of_clock = 150; // [100:300]
@@ -115,20 +115,20 @@ module circled_pattern(number) {
 /* ** Clock base ** */
 
 module center_hole() {
-    cylinder(h=height, d=diameter_of_hole);
+    cylinder(h = height_of_clock, d = diameter_of_hole);
 }
 
 module backside() {
     cylinder(
-        h=height - thickness_of_wall,
-        d=diameter_of_clock  - thickness_of_wall * 2);
+        h = height_of_clock - thickness_of_wall,
+        d = diameter_of_clock  - thickness_of_wall * 2);
 }
 
 module clock_base() {
     difference() {
         hull() {
-            cylinder(h=height, d=diameter_of_clock - width_of_chamfer);
-            cylinder(h=height - width_of_chamfer, d=diameter_of_clock);
+            cylinder(h = height_of_clock, d = diameter_of_clock - width_of_chamfer);
+            cylinder(h = height_of_clock - width_of_chamfer, d = diameter_of_clock);
         }
         
         center_hole();
@@ -162,7 +162,7 @@ module hours() {
     for (hour = [1:12]) {
         hour_offset = size_of_hours * 0.75;
         rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_hours - hour_offset, 0, height])
+        translate([diameter_of_clock / 2  - distance_of_hours - hour_offset, 0, height_of_clock])
         rotate([0, 0, rotation_angle(hour)])
         linear_extrude(height_of_hours)
         hour_text(hour, size_of_hours, font_of_hours);
@@ -189,7 +189,7 @@ module hour_marker() {
 
 module hour_markers() {
     circled_pattern(12) {
-        translate([diameter_of_clock / 2 - distance_of_markers - height_of_markers / 2, 0, height])
+        translate([diameter_of_clock / 2 - distance_of_markers - height_of_markers / 2, 0, height_of_clock])
         linear_extrude(height_of_hours)
         hour_marker();
     }
