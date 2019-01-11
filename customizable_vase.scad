@@ -1,13 +1,13 @@
 // Customizable Vase
-// Copyright: Olle Johansson 2018
+// Copyright: Olle Johansson 2019
 // License: CC BY-SA
 
 //CUSTOMIZER VARIABLES
 
 /* [Vase] */
 
-// Type of bump
-type_of_bump = 2; // [0:None, 1:Rounded, 2:Triangle]
+// Type of edge bumps
+type_of_bump = "Rounded"; // [None, Rounded, Triangle]
 
 // Diameter of base in mm
 diameter_of_base = 100; // [50:200]
@@ -22,10 +22,10 @@ width_of_bump = 20; // [10:30]
 number_of_bumps = 20; // [4:100]
 
 // Number of slices in twist
-number_of_slices = 100; // [1:200]
+number_of_slices = 50; // [1:200]
 
 // Degrees of twist
-degrees_of_twist = 180; // [0:360]
+degrees_of_twist = 20; // [0:360]
 
 // Scale of top of vase in percent
 top_scale_x = 150; // [100:400]
@@ -52,7 +52,8 @@ module circled_pattern(number) {
 /* ** Vase ** */
 
 module rounded_bump() {
-    translate([diameter_of_base / 2, 0, 0])
+    translate([diameter_of_base / 2 - width_of_bump / 8, 0, 0])
+    scale([0.8,1,1])
     circle(d = width_of_bump, center = true);
 }
 
@@ -63,8 +64,8 @@ module triangle_bump(diameter) {
 }
 
 module bump() {
-    if (type_of_bump == 1) rounded_bump();
-    else if (type_of_bump == 2) triangle_bump();
+    if (type_of_bump == "Rounded") rounded_bump();
+    else if (type_of_bump == "Triangle") triangle_bump();
 }
 
 module edge_bumps() {
