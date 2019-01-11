@@ -7,7 +7,7 @@
 /* [Clock] */
 
 // Height in mm
-height = 20; // [10:50]
+height = 5; // [5:50]
 
 // Diameter in mm of clock face
 diameter_of_clock = 150; // [100:300]
@@ -24,7 +24,7 @@ width_of_chamfer = 0; // [0:0.1:10]
 /* [Hours] */
 
 // Type of hour symbols
-type_of_hours = "Rotated numbers"; // [None, Numbers, Rotated numbers, Text]
+type_of_hours = "Rotated numbers"; // [None, Numbers, Rotated numbers, Text, Roman]
 
 // Raise or cutout hours
 raise_hours = "Raise"; // [Raise, Cutout]
@@ -50,7 +50,7 @@ show_dots = "yes"; // [yes, no]
 diameter_of_dots = 5; // [2:20]
 
 // Distance in mm of dots from clock edge
-distance_of_dots = 25; // [5:40]
+distance_of_dots = 25; // [5:80]
 
 /* [Hour texts] */
 
@@ -71,10 +71,10 @@ text_hour_twelve = "tolv";
 
 /* [Hidden] */
 
-$fn=30;
+$fn=120;
 
 positions = [ for(angle = [30 : 30 : 360]) angle ];
-hours = [
+hours_text = [
     text_hour_one,
     text_hour_two,
     text_hour_three,
@@ -88,6 +88,13 @@ hours = [
     text_hour_eleven,
     text_hour_twelve
 ];
+roman_numerals = [
+    "I", "II", "III", "IV", "V", "VI",
+    "VII", "VIII", "IX", "X", "XI", "XII"
+];
+
+function hour_text(hour) = hours_text[hour - 1];
+function hour_roman(hour) = roman_numerals[hour - 1];
 
 /* ** Utility modules ** */
 
@@ -135,6 +142,7 @@ module clock_face() {
 module hours() {
     if (type_of_hours == "Numbers") hours_numbers();
     else if (type_of_hours == "Rotated numbers") hours_rotated_numbers();
+    else if (type_of_hours == "Roman") hours_roman();
     else if (type_of_hours == "Text") hours_text();
 }
 
@@ -158,12 +166,22 @@ module hours_numbers() {
     }
 }
 
+module hours_roman() {
+    for (hour = [1:12]) {
+        rotate([0, 0, -positions[hour - 1]])
+        translate([diameter_of_clock / 2  - distance_of_hours - size_of_hours * 0.75, 0, height])
+        rotate([0, 0, 270 + positions[hour - 1]])
+        linear_extrude(height_of_hours)
+        text(hour_roman(hour), size = size_of_hours, font = font_of_hours, halign = "center", valign = "center");
+    }
+}
+
 module hours_text() {
     for (hour = [1:12]) {
         rotate([0, 0, -positions[hour - 1]])
         translate([diameter_of_clock / 2  - distance_of_hours, 0, height])
         linear_extrude(height_of_hours)
-        text(hours[hour - 1], size = size_of_hours, font = font_of_hours, halign = "right", valign = "center");
+        text(hour_text(hour), size = size_of_hours, font = font_of_hours, halign = "right", valign = "center");
     }
 }
 
@@ -179,8 +197,8 @@ module dots() {
 module clock() {
     if (raise_hours == "Raise") {
         union() {
-            clock_base();
-            clock_face();
+            color("gray") clock_base();
+            color("white") clock_face();
         }
     } else {
         difference() {
