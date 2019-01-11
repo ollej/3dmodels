@@ -26,8 +26,8 @@ width_of_chamfer = 0; // [0:0.1:10]
 // Type of hour symbols
 type_of_hours = "Numbers"; // [None, Numbers, Text, Roman]
 
-// Raise or cutout hours
-raise_hours = "Raise"; // [Raise, Cutout]
+// Raise or inset hours
+raise_hours = "Raise"; // [Raise, Inset]
 
 // Rotate hours
 rotation_of_hours = "None"; // [None, Rotated, Angled]
@@ -47,7 +47,7 @@ font_of_hours = "Gotham";
 /* [Hour markers] */
 
 // Type of hour markers
-type_of_hour_markers = "Circle"; // [None, Circle, Line]
+type_of_hour_markers = "Circle"; // [None, Circle, Line, Triangle In, Triangle Out]
 
 // Width in mm of hour markers
 width_of_markers = 5; // [1:20]
@@ -173,13 +173,24 @@ module hour_marker() {
     if (type_of_hour_markers == "Circle")
         scale([1, width_of_markers / height_of_markers, 1])
         cylinder(h = height_of_hours, d = height_of_markers);
-    else if (type_of_hour_markers == "Line") 
+    else if (type_of_hour_markers == "Line")
         square(size = [height_of_markers, width_of_markers], center = true);
+    else if (type_of_hour_markers == "Triangle In")
+        polygon(points = [
+            [height_of_markers / 2, - width_of_markers / 2],
+            [height_of_markers / 2, width_of_markers / 2],
+            [-height_of_markers / 2, 0]]);
+    else if (type_of_hour_markers == "Triangle Out")
+        polygon(points = [
+            [-height_of_markers / 2, - width_of_markers / 2],
+            [-height_of_markers / 2, width_of_markers / 2],
+            [height_of_markers / 2, 0]]);
 }
 
 module hour_markers() {
     circled_pattern(12) {
         translate([diameter_of_clock / 2 - distance_of_markers - height_of_markers / 2, 0, height])
+        linear_extrude(height_of_hours)
         hour_marker();
     }
 }
