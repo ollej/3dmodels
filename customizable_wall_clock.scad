@@ -44,16 +44,19 @@ size_of_hours = 12; // [5:20]
 // Font of hour numbers
 font_of_hours = "Gotham";
 
-/* [Hour dots] */
+/* [Hour markers] */
 
-// Show dots for each hour
-show_dots = "yes"; // [yes, no]
+// Type of hour markers
+type_of_hour_markers = "Circle"; // [None, Circle, Line]
 
-// Diameter in mm of hour dots
-diameter_of_dots = 5; // [2:20]
+// Width in mm of hour markers
+width_of_markers = 5; // [1:20]
 
-// Distance in mm of dots from clock edge
-distance_of_dots = 25; // [5:80]
+// Height (or diameter) in mm of hour markers
+height_of_markers = 10; // [1:20]
+
+// Distance in mm of markers from clock edge
+distance_of_markers = 25; // [5:80]
 
 /* [Hour texts] */
 
@@ -143,7 +146,7 @@ function rotation_angle(hour) = (rotation_of_hours == "None")
 module clock_face() {
     union() {
         if (type_of_hours != "None") hours();
-        if (show_dots == "yes") dots();
+        if (type_of_hour_markers != "None") hour_markers();
     }
 }
 
@@ -166,10 +169,18 @@ module hours() {
     }
 }
 
-module dots() {
+module hour_marker() {
+    if (type_of_hour_markers == "Circle")
+        scale([1, width_of_markers / height_of_markers, 1])
+        cylinder(h = height_of_hours, d = height_of_markers);
+    else if (type_of_hour_markers == "Line") 
+        square(size = [height_of_markers, width_of_markers], center = true);
+}
+
+module hour_markers() {
     circled_pattern(12) {
-        translate([diameter_of_clock / 2 - distance_of_dots - diameter_of_dots / 2, 0, height])
-        cylinder(h = height_of_hours, d=diameter_of_dots);
+        translate([diameter_of_clock / 2 - distance_of_markers - height_of_markers / 2, 0, height])
+        hour_marker();
     }
 }
 
