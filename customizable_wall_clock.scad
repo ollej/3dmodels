@@ -24,10 +24,13 @@ width_of_chamfer = 0; // [0:0.1:10]
 /* [Hours] */
 
 // Type of hour symbols
-type_of_hours = "Rotated numbers"; // [None, Numbers, Rotated numbers, Text, Roman]
+type_of_hours = "Numbers"; // [None, Numbers, Text, Roman]
 
 // Raise or cutout hours
 raise_hours = "Raise"; // [Raise, Cutout]
+
+// Rotate hours
+rotation_of_hours = "None"; // [None, Rotated, Angled]
 
 // Height in mm of numbers
 height_of_hours = 2; // [0.5:0.1:4]
@@ -71,7 +74,7 @@ text_hour_twelve = "tolv";
 
 /* [Hidden] */
 
-$fn=120;
+$fn = 120;
 
 positions = [ for(angle = [30 : 30 : 360]) angle ];
 hours_text = [
@@ -132,56 +135,34 @@ module clock_base() {
 
 /* ** Clock face ** */
 
+function rotation_angle(hour) = (rotation_of_hours == "None")
+    ? 270 + positions[hour - 1]
+    : (rotation_of_hours == "Rotated")
+        ? 270 : 0;
+
 module clock_face() {
     union() {
-        hours();
+        if (type_of_hours != "None") hours();
         if (show_dots == "yes") dots();
     }
 }
 
+module hour_text(hour, size, font) {
+    if (type_of_hours == "Roman")
+        text(roman_numerals[hour - 1], size = size, font = font, halign = "center", valign = "center");
+    else if (type_of_hours == "Text")
+        text(hour_text(hour), size = size, font = font, halign = "center", valign = "center");
+    else text(str(hour), size = size, font = font, halign = "center", valign = "center");
+}
+
 module hours() {
-    if (type_of_hours == "Numbers") hours_numbers();
-    else if (type_of_hours == "Rotated numbers") hours_rotated_numbers();
-    else if (type_of_hours == "Roman") hours_roman();
-    else if (type_of_hours == "Text") hours_text();
-}
-
-module hours_rotated_numbers() {
     for (hour = [1:12]) {
+        hour_offset = size_of_hours * 0.75;
         rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_hours, 0, height])
-        rotate([0, 0, 270])
+        translate([diameter_of_clock / 2  - distance_of_hours - hour_offset, 0, height])
+        rotate([0, 0, rotation_angle(hour)])
         linear_extrude(height_of_hours)
-        text(str(hour), size = size_of_hours, font = font_of_hours, halign = "center", valign = "top");
-    }
-}
-
-module hours_numbers() {
-    for (hour = [1:12]) {
-        rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_hours - size_of_hours * 0.75, 0, height])
-        rotate([0, 0, 270 + positions[hour - 1]])
-        linear_extrude(height_of_hours)
-        text(str(hour), size = size_of_hours, font = font_of_hours, halign = "center", valign = "center");
-    }
-}
-
-module hours_roman() {
-    for (hour = [1:12]) {
-        rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_hours - size_of_hours * 0.75, 0, height])
-        rotate([0, 0, 270 + positions[hour - 1]])
-        linear_extrude(height_of_hours)
-        text(hour_roman(hour), size = size_of_hours, font = font_of_hours, halign = "center", valign = "center");
-    }
-}
-
-module hours_text() {
-    for (hour = [1:12]) {
-        rotate([0, 0, -positions[hour - 1]])
-        translate([diameter_of_clock / 2  - distance_of_hours, 0, height])
-        linear_extrude(height_of_hours)
-        text(hour_text(hour), size = size_of_hours, font = font_of_hours, halign = "right", valign = "center");
+        hour_text(hour, size_of_hours, font_of_hours);
     }
 }
 
