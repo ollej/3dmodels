@@ -172,7 +172,7 @@ module hours() {
 module hour_marker() {
     if (type_of_hour_markers == "Circle")
         scale([1, width_of_markers / height_of_markers, 1])
-        cylinder(h = height_of_hours, d = height_of_markers);
+        circle(d = height_of_markers);
     else if (type_of_hour_markers == "Line")
         square(size = [height_of_markers, width_of_markers], center = true);
     else if (type_of_hour_markers == "Triangle In")
