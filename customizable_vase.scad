@@ -7,7 +7,7 @@
 /* [Main] */
 
 // Type of vase
-type_of_vase = "Bulbed bowl"; // [Bulbed bowl, Twisted vase]
+type_of_vase = "Bulbed bowl"; // [Bulbed bowl, Twisted vase, Bulbed vase]
 
 // Diameter of vase in mm
 diameter_of_vase = 100; // [50:200]
@@ -51,6 +51,17 @@ top_scale_x = 150; // [100:400]
 
 // Scale of top of vase in percent
 top_scale_y = 250; // [100:400]
+
+/* [Bulbed vase] */
+
+// Cutoff width in mm of opening
+opening_cutout_width = 5; // [0:10]
+
+// Scale of neck part of vase in X
+bulbed_neck_scale_x = 75; // [40:90]
+
+// Scale of lower bulb part of vase in X
+bulbed_bulb_scale_x = 75; // [1:100]
 
 //CUSTOMIZER VARIABLES END
 
@@ -123,6 +134,34 @@ module bulbed_bowl(diameter, height) {
     }
 }
 
+module bulbed_vase_form(diameter, height) {
+    difference() {
+        union() {
+            square(size = [diameter / 2, height], center = true);
+            
+            // Bulbed lower part
+            translate([diameter / 4, - height / 4, 0])
+            scale([bulbed_bulb_scale_x / 100, height / diameter / 2, 1])
+            circle(d = diameter, center = true);
+        }
+
+        // Neck upper part
+        translate([diameter / 4, height / 4, 0])
+        scale([bulbed_neck_scale_x / 100, height / diameter / 2, 1])
+        circle(d = diameter, center = true);
+        
+        // Opening
+        translate([diameter / 4 - opening_cutout_width / 2, height / 2 - opening_cutout_width / 2, 0])
+        square(size = opening_cutout_width, center = true);
+    }
+}
+
+module bulbed_vase(diameter, height) {
+    rotate_extrude()
+    translate([diameter / 4, height / 2, 0])
+    bulbed_vase_form(diameter, height);
+}
+
 module complex_vase(diameter, height) {
     union() {
         for( z_offset = [ 0 : z_step : height ] ) {
@@ -146,6 +185,7 @@ module complex_vase(diameter, height) {
 module vase() {
     if (type_of_vase == "Twisted vase") twisted_vase(diameter_of_vase, height_of_vase);
     else if (type_of_vase == "Bulbed bowl") bulbed_bowl(diameter_of_vase, height_of_vase);
+    else if (type_of_vase == "Bulbed vase") bulbed_vase(diameter_of_vase, height_of_vase);
     else if (type_of_vase == "Complex Vase") complex_vase(diameter_of_vase, height_of_vase);
 }
 
