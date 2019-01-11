@@ -6,6 +6,9 @@
 
 /* [Vase] */
 
+// Type of vase
+type_of_vase = "Bowl"; // [Bowl, Vase]
+
 // Type of edge bumps
 type_of_bump = "Rounded"; // [None, Rounded, Triangle]
 
@@ -32,6 +35,8 @@ top_scale_x = 150; // [100:400]
 
 // Scale of top of vase in percent
 top_scale_y = 250; // [100:400]
+
+z_step = 10;
 
 //CUSTOMIZER VARIABLES END
 
@@ -80,9 +85,34 @@ module vase_base() {
 
 /* ** Main object ** */
 
-module vase() {
+module simple_bowl() {
     linear_extrude(height = height_of_vase, convexity = 1, twist = degrees_of_twist, slices = number_of_slices, scale=[top_scale_x / 100, top_scale_y / 100])
     vase_base();
+}
+
+module complex_vase() {
+    union() {
+        for( z_offset = [ 0 : z_step : height_of_vase ] ) {
+            z_height = height_of_vase / z_step;
+            translate([0, 0, z_offset])
+            linear_extrude(
+                height = z_step,
+                convexity = 10,
+                twist = - degrees_of_twist / z_height, 
+                slices = number_of_slices / z_height
+            )
+            rotate([0, 0, degrees_of_twist / height_of_vase * z_offset])
+            vase_base();
+        }
+        //linear_extrude(height = z_change, convexity = 1, 
+
+        // TODO: multiple scale points vertically
+    }
+}
+
+module vase() {
+    if (type_of_vase == "Bowl") simple_bowl();
+    else if (type_of_vase == "Vase") complex_vase();
 }
 
 vase();
