@@ -10,7 +10,7 @@
 type_of_vase = "Bulbed bowl"; // [Bulbed bowl, Twisted vase, Bulbed vase]
 
 // Diameter of vase in mm
-diameter_of_vase = 100; // [50:200]
+diameter_of_vase = 100; // [75:200]
 
 // Height of vase in mm
 height_of_vase = 200; // [50:300]
@@ -54,14 +54,14 @@ top_scale_y = 250; // [100:400]
 
 /* [Bulbed vase] */
 
-// Cutoff width in mm of opening
-opening_cutout_width = 5; // [0:10]
+// Brim width in mm of opening
+opening_brim_width = 5; // [2:35]
 
-// Scale of neck part of vase in X
-bulbed_neck_scale_x = 75; // [40:90]
+// Scale of neck part of vase
+bulbed_neck_scale = 75; // [10:90]
 
-// Scale of lower bulb part of vase in X
-bulbed_bulb_scale_x = 75; // [1:100]
+// Scale of lower bulb part of vase
+bulbed_bulb_scale = 75; // [1:100]
 
 //CUSTOMIZER VARIABLES END
 
@@ -69,7 +69,7 @@ bulbed_bulb_scale_x = 75; // [1:100]
 
 z_step = 10;
 
-$fn=100;
+$fn = 120;
 
 /* ** Utility modules ** */
 
@@ -141,18 +141,18 @@ module bulbed_vase_form(diameter, height) {
             
             // Bulbed lower part
             translate([diameter / 4, - height / 4, 0])
-            scale([bulbed_bulb_scale_x / 100, height / diameter / 2, 1])
+            scale([bulbed_bulb_scale / 100, height / diameter / 2, 1])
             circle(d = diameter, center = true);
         }
 
         // Neck upper part
         translate([diameter / 4, height / 4, 0])
-        scale([bulbed_neck_scale_x / 100, height / diameter / 2, 1])
+        scale([bulbed_neck_scale / 100, height / diameter / 2, 1])
         circle(d = diameter, center = true);
         
         // Opening
-        translate([diameter / 4 - opening_cutout_width / 2, height / 2 - opening_cutout_width / 2, 0])
-        square(size = opening_cutout_width, center = true);
+        translate([diameter / 4 - opening_brim_width / 2, height / 2 - height / 8, 0])
+        square(size = [opening_brim_width, height / 4], center = true);
     }
 }
 
