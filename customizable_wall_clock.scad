@@ -7,7 +7,7 @@
 /* [Clock] */
 
 // Which part to render
-part = "Complete"; // [Complete, Base, Face]
+part = "Complete"; // [Complete, Base, Base Inset, Face, Face Inset]
 
 // Height in mm of clock face
 height_of_clock = 5; // [5:50]
@@ -148,7 +148,9 @@ function rotation_angle(hour) =
         : (rotation_of_hours == "Rotated")
             ? 270 : 0;
 
-module clock_face() {
+module clock_face(invert) {
+    z_offset = invert ? -height_of_hours : 0;
+    translate([0, 0, z_offset])
     union() {
         if (type_of_hours != "None") hours();
         if (type_of_hour_markers != "None") hour_markers();
@@ -200,22 +202,29 @@ module hour_markers() {
     }
 }
 
+/* ** Combined objects ** */
+
+module clock_raised_hours() {
+    union() {
+        color("gray") clock_base();
+        color("white") clock_face();
+    }
+}
+
+module clock_inset_hours() {
+    difference() {
+        clock_base();
+        clock_face(invert = true);
+    }
+}
+
 /* ** Main object ** */
 
-// TODO: Support inset color
 module clock() {
     if (raise_hours == "Raise") {
-        union() {
-            color("gray") clock_base();
-            color("white") clock_face();
-        }
+        clock_raised_hours();
     } else {
-        difference() {
-            clock_base();
-            
-            translate([0, 0, -height_of_hours])
-            clock_face();
-        }
+        clock_inset_hours();
     }
 }
 
@@ -224,8 +233,12 @@ module print_part() {
 		clock();
 	} else if (part == "Base") {
 		clock_base();
+	} else if (part == "Base Inset") {
+		clock_inset_hours();
 	} else if (part == "Face") {
 		clock_face();
+	} else if (part == "Face Inset") {
+		clock_face(invert = true);
 	}
 }
 
