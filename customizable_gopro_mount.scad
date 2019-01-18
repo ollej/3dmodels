@@ -1,5 +1,5 @@
 // Customizable GoPro mount for Anet A6 Z motor
-// Copyright: Olle Johansson 2019
+// Copyright: Olle Wreede 2019
 // License: CC BY-SA
 
 // 31 between mount holes
