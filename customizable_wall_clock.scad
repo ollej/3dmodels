@@ -1,5 +1,5 @@
 // Customizable Wall Clock
-// Copyright: Olle Johansson 2018
+// Copyright: Olle Wreede 2019
 // License: CC BY-SA
 
 //CUSTOMIZER VARIABLES
