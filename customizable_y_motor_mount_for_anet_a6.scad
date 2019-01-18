@@ -1,5 +1,5 @@
 // Customizable Y Motor Mount for Anet A6
-// Copyright: Olle Johansson 2019
+// Copyright: Olle Wreede 2019
 // License: CC BY-SA
 
 //CUSTOMIZER VARIABLES
@@ -7,8 +7,11 @@
 // Thickness in mm of backplate
 backplate_thickness = 6; // [4:10]
 
-// Distance in mm that motor is lowered from default
-motor_lowered_by = 1; // [0:0.1:4]
+// Height in mm of cutout of bottom
+bottom_cutout_height = 8.5; // [6:0.5:10]
+
+// Distance in mm that motor is lowered from default height
+motor_lowered_by = 2; // [0:0.1:4]
 
 // Width in mm of hole for back frame brace
 width_of_opening_for_back_frame_brace = 10.5; // [0:15]
@@ -29,7 +32,7 @@ depth_of_trapped_nut_hole = 2.6; // [2:0.1:4]
 width_of_trapped_nut_hole = 7.5; // [6:0.1:10]
 
 // Height in mm of hole for trapped nut
-height_of_trapped_nut_hole = 5.5; // [4:0.1:8]
+height_of_trapped_nut_hole = 5.6; // [4:0.1:8]
 
 //CUSTOMIZER VARIABLES END
 
@@ -69,6 +72,7 @@ module motor_mount_plate() {
     translate([51/2, 47 - 8/2, 56/2])
     difference() {
         cube([51, 8, 56], center=true);
+        // Maybe decrease 0.1mm to add clearance for back frame brace
         
         // Motor shaft hole
         translate([6/3, 0, height_of_base/2])
@@ -98,15 +102,17 @@ module bottom_plate() {
     translate([51/2, 47/2, height_of_base/2])
     difference() {
         cube([51, 47, height_of_base], center=true);
+        // Optionally increase with 6mm to support dampener
+        // Add holes in bottom to decrease plastic usage
 
-        translate([0, 0, -4])
-        cube([51, 31, 8], center=true);
-        
+        translate([0, 0, bottom_cutout_height/2 - height_of_base/2])
+        cube([51, 31, bottom_cutout_height], center=true);
+
         // Leave opening for back frame brace
         if (width_of_opening_for_back_frame_brace > 0) {
-            translate([51/2 - width_of_opening_for_back_frame_brace/2, 8/2 - 47/2, -4])
-            cube([width_of_opening_for_back_frame_brace, 8, 8], center=true);
-        }  
+            translate([51/2 - width_of_opening_for_back_frame_brace/2, 8/2 - 47/2, bottom_cutout_height/2 - height_of_base/2])
+            cube([width_of_opening_for_back_frame_brace, 8, bottom_cutout_height], center=true);
+        }
     }
 }
 
@@ -114,10 +120,10 @@ module back_plate() {
     translate([3, 47/2, 43/2])
     cube([backplate_thickness, 47, 43], center=true);
     
-    translate([-4, 47 - 8/2, 43/2 + 15/2])
+    translate([-4, 47 - 8/2, 16.5 + 15/2])
     cube([8, 8, 15], center=true);
     
-    translate([-4, 8/2, 43/2 + 15/2])
+    translate([-4, 8/2, 16.5 + 15/2])
     cube([8, 8, 15], center=true);
 }
 
