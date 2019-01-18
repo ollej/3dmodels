@@ -1,5 +1,5 @@
 // Customizable Bed Handle for Anet A6
-// Copyright: Olle Johansson 2019
+// Copyright: Olle Wreede 2019
 // License: CC BY-SA
 
 //CUSTOMIZER VARIABLES
@@ -24,7 +24,7 @@ bed_mount_plate_distance = 122; // [100:150]
 /* [Handle] */
 
 // Type of handle
-handle_type = "Half disc"; // [Square, Half disc, GoPro, Round]
+handle_type = "Round"; // [Square, Half disc, GoPro, Round]
 
 // Width in mm of handle
 handle_width = 60; // [30:100]
@@ -48,7 +48,6 @@ gopro_arm_length = 6; // [2:15]
 bed_mount_slit_width = (bed_mount_width - bed_mount_plate_distance) / 2;
 bed_mount_height = bed_mount_slit_height + bed_mount_thickness*2;
 gopro_height = 15;
-
 
 $fn=120;
 
@@ -194,6 +193,19 @@ module handle_round(width, thickness, height, depth) {
     circle(r = height / 2);
 }
 
+module diagonal_braces(width, depth, height, thickness) {
+    brace_length = sqrt(width * width + depth * depth);
+    brace_angle = atan(depth / width);
+
+    translate([width / 2 + thickness * 2, 0, thickness / 2])
+    rotate([0, 0, brace_angle])
+    cube([brace_length, thickness, height], center = true);
+
+    translate([-width / 2 - thickness * 2, 0, thickness / 2])
+    rotate([0, 0, -brace_angle])
+    cube([brace_length, thickness, height], center = true);
+}
+
 module bed_mount(width, depth, height, slit_width=20, slit_height=3, thickness=2) {
     cutout_width = width / 2 - slit_width - thickness * 4;
     cutout_depth = depth - thickness * 2;
@@ -217,14 +229,7 @@ module bed_mount(width, depth, height, slit_width=20, slit_height=3, thickness=2
     }
     
     // Diagonal braces for strength
-    brace_length = sqrt(cutout_width * cutout_width + cutout_depth * cutout_depth);
-    brace_angle = atan(cutout_depth / cutout_width);
-    translate([cutout_width / 2 + thickness * 2, 0, thickness / 2])
-    rotate([0, 0, brace_angle])
-    cube([brace_length, thickness, height - thickness], center=true);
-    translate([-cutout_width / 2 - thickness * 2, 0, thickness / 2])
-    rotate([0, 0, -brace_angle])
-    cube([brace_length, thickness, height - thickness], center=true);
+    diagonal_braces(cutout_width, cutout_depth, height - thickness, thickness);
 }
 
 module bed_handle() {
