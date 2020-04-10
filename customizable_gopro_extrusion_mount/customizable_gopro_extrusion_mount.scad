@@ -7,8 +7,8 @@
 // Width of extrusion profile
 extrusion_width = 30; // [20:20 mm, 30:30 mm]
 
-// Add extrusion slot ridge
-slot_ridge = 1; // [0:No, 1:Yes]
+// Slot mount option
+slot_mount = 1; // [0:None, 1:Slot Ridge, 2:Twist Nut]
 
 // Extended height in mm of GoPro mount
 mount_height = 0; // [0:1:10]
@@ -23,7 +23,7 @@ bracket_thickness = 4; // [3:1:6]
 bracket_corner_radius = 3; // [1:0.5:5]
 
 // Diameter in mm of mount screw holes
-mount_hole_diameter = 4; // [3:M3, 4:M4, 5:M5, 6:M6]
+mount_hole_diameter = 4; // [0:None, 3:M3, 4:M4, 5:M5, 6:M6]
 
 // Distance in mm between mount screw holes
 mount_hole_distance = 32; // [25:1:40]
@@ -135,6 +135,36 @@ module mount_holes(hole_diameter, hole_distance, hole_depth) {
     cylinder_outer(hole_diameter, hole_depth, $fn);
 }
 
+module slot_ridge(width, thickness, slot_width, slot_thickness) {
+    translate([- width / 2, -slot_width / 2, - thickness / 2 - slot_thickness])
+    cube([width, slot_width, slot_thickness]);
+}
+
+module twist_nut(hole_diameter, bracket_thickness) {
+    cylinder_diameter = 8;
+    cylinder_height = 6;
+    nut_width = 16;
+    nut_height = cylinder_height - slot_thickness;
+    translate([0, 0, -cylinder_height/2 - bracket_thickness/2])
+    rotate([180, 0, 90])
+    union() {
+        cylinder_outer(cylinder_diameter, cylinder_height, $fn);
+
+        translate([-nut_width / 2, 0, slot_thickness/2 - nut_height/2])
+        rotate([90, 0, 0])
+        linear_extrude(height = cylinder_diameter, center=true)
+        polygon(points=[
+            [0, 0],
+            [nut_width, 0],
+            [nut_width, 1],
+            [nut_width/2 + cylinder_diameter/2, nut_height],
+            [nut_width/2 - cylinder_diameter/2, nut_height],
+            [0, 1]
+        ]);
+
+    }
+}
+
 module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distance, slot_thickness) {
     difference() {
         union() {
@@ -146,10 +176,12 @@ module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distan
         }
         
         // Mount holes
-        hole_depth = thickness + slot_thickness;
-        //echo("hole_depth: ", thickness, hole_depth);
-        translate([0, 0, - slot_thickness / 2])
-        #mount_holes(hole_diameter, hole_distance, hole_depth);
+        if (hole_diameter > 0) {
+            hole_depth = thickness + slot_thickness;
+            //echo("hole_depth: ", thickness, hole_depth);
+            translate([0, 0, - slot_thickness / 2])
+            #mount_holes(hole_diameter, hole_distance, hole_depth);
+        }
     }
 }
 
@@ -159,12 +191,8 @@ module gopro_mount(bracket_thickness, mount_height) {
     mount3(mount_height);
 }
 
-module slot_ridge(width, thickness, slot_width, slot_thickness) {
-    translate([- width / 2, -slot_width / 2, - thickness / 2 - slot_thickness])
-    cube([width, slot_width, slot_thickness]);
-}
-
 module gopro_bracket() {
+    slot_ridge_thickness = (slot_mount == 1) ? slot_thickness : 0;
     mount_bracket(
         bracket_width,
         extrusion_width,
@@ -172,9 +200,13 @@ module gopro_bracket() {
         bracket_corner_radius,
         mount_hole_diameter,
         mount_hole_distance,
-        slot_ridge * slot_thickness);
+        slot_ridge_thickness);
 
     gopro_mount(bracket_thickness, mount_height);
+
+    if (slot_mount == 2) {
+        twist_nut(mount_hole_diameter, bracket_thickness);
+    }
 }
 
 gopro_bracket();
