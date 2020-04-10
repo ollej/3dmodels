@@ -8,7 +8,7 @@
 extrusion_width = 30; // [20:20 mm, 30:30 mm]
 
 // Slot mount option
-slot_mount = 1; // [0:None, 1:Slot Ridge, 2:Twist Nut]
+slot_mount = 1; // [0:None, 1:Slot Ridge, 2:Twist Nut, 3:Twist Nut Rotated]
 
 // Extended height in mm of GoPro mount
 mount_height = 0; // [0:1:10]
@@ -140,13 +140,13 @@ module slot_ridge(width, thickness, slot_width, slot_thickness) {
     cube([width, slot_width, slot_thickness]);
 }
 
-module twist_nut(hole_diameter, bracket_thickness) {
+module twist_nut(hole_diameter, bracket_thickness, angle) {
     cylinder_diameter = 8;
     cylinder_height = 6;
     nut_width = 16;
     nut_height = cylinder_height - slot_thickness;
     translate([0, 0, -cylinder_height/2 - bracket_thickness/2])
-    rotate([180, 0, 90])
+    rotate([180, 0, angle])
     union() {
         cylinder_outer(cylinder_diameter, cylinder_height, $fn);
 
@@ -204,8 +204,9 @@ module gopro_bracket() {
 
     gopro_mount(bracket_thickness, mount_height);
 
-    if (slot_mount == 2) {
-        twist_nut(mount_hole_diameter, bracket_thickness);
+    if (slot_mount >= 2) {
+        nut_angle = (slot_mount - 2) * 90;
+        twist_nut(mount_hole_diameter, bracket_thickness, nut_angle);
     }
 }
 
