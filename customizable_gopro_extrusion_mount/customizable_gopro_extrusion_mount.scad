@@ -137,11 +137,17 @@ module mount_holes(hole_diameter, hole_distance, hole_depth) {
 
 module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distance, slot_thickness) {
     difference() {
-        cube_rounded(width, depth, thickness, radius);
+        union() {
+            cube_rounded(width, depth, thickness, radius);
+        
+            if (slot_thickness > 0) {
+                slot_ridge(width, thickness, slot_width, slot_thickness);
+            }
+        }
         
         // Mount holes
         hole_depth = thickness + slot_thickness;
-        echo("hole_depth: ", thickness, hole_depth);
+        //echo("hole_depth: ", thickness, hole_depth);
         translate([0, 0, - slot_thickness / 2])
         #mount_holes(hole_diameter, hole_distance, hole_depth);
     }
@@ -169,10 +175,6 @@ module gopro_bracket() {
         slot_ridge * slot_thickness);
 
     gopro_mount(bracket_thickness, mount_height);
-    
-    if (slot_ridge == 1) {
-        slot_ridge(bracket_width, bracket_thickness, slot_width, slot_thickness);
-    }
 }
 
 gopro_bracket();
