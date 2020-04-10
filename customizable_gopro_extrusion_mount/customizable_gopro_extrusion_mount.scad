@@ -4,6 +4,9 @@
 
 //CUSTOMIZER VARIABLES
 
+// Extended height in mm of GoPro mount
+mount_height = 0; // [0:1:10]
+
 // Width in mm of bracket
 bracket_width = 45; // [40:1:60]
 
@@ -123,10 +126,10 @@ module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distan
     }
 }
 
-module gopro_mount(bracket_thickness) {
-    translate([0, 0, gopro_size / 2 + bracket_thickness / 2])
+module gopro_mount(bracket_thickness, mount_height) {
+    translate([0, 0, gopro_size / 2 + bracket_thickness / 2 + mount_height])
     rotate([0, 90, 90])
-    mount3();
+    mount3(mount_height);
 }
 
 module gopro_bracket() {
@@ -138,7 +141,7 @@ module gopro_bracket() {
         mount_hole_diameter,
         mount_hole_distance);
 
-    gopro_mount(bracket_thickness);
+    gopro_mount(bracket_thickness, mount_height);
 }
 
 gopro_bracket();
