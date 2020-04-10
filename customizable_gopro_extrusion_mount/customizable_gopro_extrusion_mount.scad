@@ -25,9 +25,16 @@ mount_hole_diameter = 4; // [3:M3, 4:M4, 5:M5, 6:M6]
 // Distance in mm between mount screw holes
 mount_hole_distance = 32; // [25:1:40]
 
+// Add slot ridge
+slot_ridge = 1; // [0:No, 1:Yes]
+
 //CUSTOMIZER VARIABLES END
 
 /* [Hidden] */
+
+// 8.2mm slot hole width
+// 16.5 slot width
+// 2mm thickness
 
 $fn=120;
 
@@ -107,22 +114,25 @@ module cube_rounded(width, height, thickness, radius=1) {
 
 /* Mount */
 
-module mount_holes(hole_diameter, hole_distance, depth, thickness) {
+module mount_holes(hole_diameter, hole_distance, hole_depth) {
     translate([hole_distance / 2, 0, 0])
     rotate([0, 0, 90])
-    cylinder_outer(hole_diameter, thickness, $fn);
+    cylinder_outer(hole_diameter, hole_depth, $fn);
     
     translate([-hole_distance / 2, 0, 0])
     rotate([0, 0, 90])
-    cylinder_outer(hole_diameter, thickness, $fn);
+    cylinder_outer(hole_diameter, hole_depth, $fn);
 }
 
-module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distance) {
+module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distance, slot_ridge) {
     difference() {
         cube_rounded(width, depth, thickness, radius);
         
         // Mount holes
-        mount_holes(hole_diameter, hole_distance, depth, thickness);
+        hole_depth = thickness + slot_ridge * 2;
+        echo("hole_depth: ", thickness, hole_depth);
+        translate([0, 0, - slot_ridge])
+        #mount_holes(hole_diameter, hole_distance, hole_depth);
     }
 }
 
@@ -132,6 +142,11 @@ module gopro_mount(bracket_thickness, mount_height) {
     mount3(mount_height);
 }
 
+module slot_ridge(width, thickness) {
+    translate([- width / 2, -4, - thickness / 2 - 2])
+    cube([width, 8, 2]);
+}
+
 module gopro_bracket() {
     mount_bracket(
         bracket_width,
@@ -139,9 +154,14 @@ module gopro_bracket() {
         bracket_thickness,
         bracket_corner_radius,
         mount_hole_diameter,
-        mount_hole_distance);
+        mount_hole_distance,
+        slot_ridge);
 
     gopro_mount(bracket_thickness, mount_height);
+    
+    if (slot_ridge == 1) {
+        slot_ridge(bracket_width, bracket_thickness);
+    }
 }
 
 gopro_bracket();
