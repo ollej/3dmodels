@@ -5,7 +5,7 @@
 //CUSTOMIZER VARIABLES
 
 // Thickness in mm of bracket
-bracket_thickness = 2; // [2:1:6]
+bracket_thickness = 4; // [2:0.25:8]
 
 // Radius of corners of bracket
 bracket_corner_radius = 1; // [0:0.5:2.5]
@@ -20,7 +20,7 @@ plate_thickness = 4; // [2:0.5:8]
 case_depth = 5; // [1:0.5:10]
 
 // Diameter in mm of fan hole on case
-fan_hole_diameter = 30;
+fan_hole_diameter = 30; // [20:1:40]
 
 // Air gap in mm behind pi case
 air_gap_width = 5; // [0:1:8]
@@ -44,9 +44,9 @@ plate_height = 60;
 // 30 mm dia
 // 30mm från sidan
 // 32mm från botten
+// +3mm från kant och botten
 
-// Tjockare bakplatta
-// Luftficka bakom pi
+// lägg till slot ridge
 
 $fn=120;
 
@@ -65,25 +65,33 @@ module cube_rounded(width, height, thickness, radius=1) {
 
 module mount_holes(hole_diameter, hole_distance, hole_depth) {
     translate([hole_distance, -hole_distance, 0])
-    #cylinder_outer(hole_diameter, hole_depth, $fn);
+    cylinder_outer(hole_diameter, hole_depth, $fn);
     
     translate([-hole_distance, -hole_distance, 0])
-    #cylinder_outer(hole_diameter, hole_depth, $fn);
+    cylinder_outer(hole_diameter, hole_depth, $fn);
 }
 
-module side_plate(thickness, case_depth, pi_width, corner_radius, fan_diameter) {
-    translate([0, 60/2 - thickness, thickness/2])
+module side_plate(thickness, plate_thickness, case_depth, pi_width, corner_radius, fan_diameter) {
+    translate([
+        plate_height / 2, // Z
+        60/2 - thickness, // Y
+        -plate_thickness / 2 // X
+    ])
     rotate([0, 90, 90])
     difference() {
         linear_extrude(height=thickness)
         polygon(points=[
-            [thickness, -30 + case_depth + thickness],
-            [pi_width + thickness, -30 + case_depth + thickness],
-            [thickness, 30 - corner_radius]
+            [0, case_depth + thickness],
+            [pi_width, case_depth + thickness],
+            [0, 60 - corner_radius]
         ]);
 
         // Fan hole
-        translate([30 + thickness, 2, thickness/2])
+        translate([
+            pi_width / 2, // X
+            33 + thickness, // Z
+            thickness / 2 // Y
+        ])
         cylinder_outer(fan_diameter, thickness, $fn);
     }
 }
@@ -109,7 +117,7 @@ module mount_plate(pi_width, pi_height, thickness, plate_thickness, height, case
             }
 
             // Side plate
-            side_plate(thickness, case_depth, pi_width, corner_radius, fan_diameter);
+            side_plate(thickness, plate_thickness, case_depth, pi_width, corner_radius, fan_diameter);
 
         }
 
