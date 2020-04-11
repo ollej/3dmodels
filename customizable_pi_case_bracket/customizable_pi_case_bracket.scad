@@ -22,6 +22,9 @@ case_depth = 5; // [1:0.5:10]
 // Diameter in mm of fan hole on case
 fan_hole_diameter = 30;
 
+// Air gap in mm behind pi case
+air_gap_width = 5; // [0:1:8]
+
 //CUSTOMIZER VARIABLES END
 
 /* [Hidden] */
@@ -85,7 +88,7 @@ module side_plate(thickness, case_depth, pi_width, corner_radius, fan_diameter) 
     }
 }
 
-module mount_plate(pi_width, pi_height, thickness, plate_thickness, height, case_depth, corner_radius, fan_diameter) {
+module mount_plate(pi_width, pi_height, thickness, plate_thickness, height, case_depth, corner_radius, fan_diameter, air_gap) {
     translate([
         pi_width / 2 + plate_thickness / 2,
         -pi_height / 2 + thickness,
@@ -94,21 +97,28 @@ module mount_plate(pi_width, pi_height, thickness, plate_thickness, height, case
     difference() {
         union() {
             // Back plate
-            cube_rounded(60, height, plate_thickness);
+            translate([0, air_gap, 0])
+            union() {
+                cube_rounded(60, height, plate_thickness);
+
+                // Hide rounded corner
+                if (air_gap < corner_radius) {
+                    translate([60 / 2 - corner_radius / 2, height / 2 - corner_radius / 2, 0])
+                    #cube([corner_radius, corner_radius, plate_thickness], center=true);
+                }
+            }
 
             // Side plate
             side_plate(thickness, case_depth, pi_width, corner_radius, fan_diameter);
 
-            // Hide rounded corner
-            translate([60 / 2 - corner_radius / 2, height / 2 - corner_radius / 2, 0])
-            cube([corner_radius, corner_radius, plate_thickness], center=true);
         }
 
+        translate([0, air_gap, 0])
         mount_holes(mount_hole_diameter, 15, plate_thickness);
     }
 }
 
-module case_holder(pi_width, pi_height, thickness, radius, plate_thickness, plate_height, case_depth, fan_diameter) {
+module case_holder(pi_width, pi_height, thickness, radius, plate_thickness, plate_height, case_depth, fan_diameter, air_gap) {
     difference() {
         cube_rounded(pi_width + thickness * 2, pi_height + thickness * 2, case_depth + bracket_thickness, radius);
         
@@ -116,7 +126,7 @@ module case_holder(pi_width, pi_height, thickness, radius, plate_thickness, plat
         cube([pi_width, pi_height, case_depth], center=true);
     }
     
-    mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height, case_depth, radius, fan_diameter);
+    mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height, case_depth, radius, fan_diameter, air_gap);
 }
 
-case_holder(pi_width, pi_height, bracket_thickness, bracket_corner_radius, plate_thickness, plate_height, case_depth, fan_hole_diameter);
+case_holder(pi_width, pi_height, bracket_thickness, bracket_corner_radius, plate_thickness, plate_height, case_depth, fan_hole_diameter, air_gap_width);
