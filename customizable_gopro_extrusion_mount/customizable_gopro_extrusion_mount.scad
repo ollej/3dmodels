@@ -11,13 +11,13 @@ extrusion_width = 30; // [20:20 mm, 30:30 mm]
 slot_mount = 1; // [0:None, 1:Slot Ridge, 2:Twist Nut, 3:Twist Nut Rotated]
 
 // Extended height in mm of GoPro mount
-mount_height = 0; // [0:1:10]
+mount_height = 4; // [0:1:10]
 
 // Width in mm of bracket
 bracket_width = 45; // [40:1:60]
 
 // Thickness in mm of bracket
-bracket_thickness = 4; // [3:1:6]
+bracket_thickness = 4; // [2:1:6]
 
 // Radius in mm of bracket corners
 bracket_corner_radius = 3; // [1:0.5:5]
@@ -27,6 +27,9 @@ mount_hole_diameter = 4; // [0:None, 3:M3, 4:M4, 5:M5, 6:M6]
 
 // Distance in mm between mount screw holes
 mount_hole_distance = 32; // [25:1:40]
+
+// Rotate trapped nut in GoPro mount
+rotate_gopro_nut = 90; // [0:No, 90:Yes]
 
 //CUSTOMIZER VARIABLES END
 
@@ -48,7 +51,11 @@ $fn=120;
 gopro_size = 15;
 
 slot_width = (extrusion_width == 30) ? 8 : 6;
-slot_thickness = (extrusion_width == 30) ? 2 : 1.8;
+slot_thickness = (extrusion_width == 30) ? 1 : 1.8; //2 : 1.8;
+
+// For outer slot on T-profile
+slot_width = 10.2;
+slot_thickness = 1;
 
 
 /*
@@ -57,10 +64,10 @@ slot_thickness = (extrusion_width == 30) ? 2 : 1.8;
  * https://www.thingiverse.com/thing:3088912
  */
 
-module nut_hole()
+module nut_hole(nut_angle = 90)
 {
-	rotate([0, 90, 0]) // (Un)comment to rotate nut hole
-	rotate([90, 0, 0])
+	//rotate([0, 90, 0]) // (Un)comment to rotate nut hole
+	rotate([90, nut_angle, 0])
 		for(i = [0:(360 / 3):359])
 		{
 			rotate([0, 0, i]) cube([4.6765, 8.1, 5], center = true);
@@ -93,14 +100,14 @@ module mount2(depth = 0)
 	}
 }
 
-module mount3(depth = 0)
+module mount3(depth = 0, nut_angle = 90)
 {
 	union()
 	{
 		difference()
 		{
 			translate([0, -2.5, 0]) flap(8, depth);
-			translate([0, -8.5, 0]) nut_hole();
+			translate([0, -8.5, 0]) nut_hole(nut_angle);
 		}
 
 		mount2(depth);
@@ -185,10 +192,10 @@ module mount_bracket(width, depth, thickness, radius, hole_diameter, hole_distan
     }
 }
 
-module gopro_mount(bracket_thickness, mount_height) {
+module gopro_mount(bracket_thickness, mount_height, nut_angle = 90) {
     translate([0, 0, gopro_size / 2 + bracket_thickness / 2 + mount_height])
     rotate([0, 90, 90])
-    mount3(mount_height);
+    mount3(mount_height, nut_angle);
 }
 
 module gopro_bracket() {
@@ -198,15 +205,15 @@ module gopro_bracket() {
         extrusion_width,
         bracket_thickness,
         bracket_corner_radius,
-        mount_hole_diameter,
+        mount_hole_diameter * 1.1,
         mount_hole_distance,
         slot_ridge_thickness);
 
-    gopro_mount(bracket_thickness, mount_height);
+    gopro_mount(bracket_thickness, mount_height, rotate_gopro_nut);
 
     if (slot_mount >= 2) {
         nut_angle = (slot_mount - 2) * 90;
-        twist_nut(mount_hole_diameter, bracket_thickness, nut_angle);
+        twist_nut(mount_hole_diameter * 1.1, bracket_thickness, nut_angle);
     }
 }
 
