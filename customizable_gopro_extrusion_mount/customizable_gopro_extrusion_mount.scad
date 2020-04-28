@@ -17,7 +17,7 @@ mount_height = 4; // [0:1:10]
 bracket_width = 45; // [40:1:60]
 
 // Thickness in mm of bracket
-bracket_thickness = 4; // [2:1:6]
+bracket_thickness = 4; // [2:0.5:6]
 
 // Radius in mm of bracket corners
 bracket_corner_radius = 3; // [1:0.5:5]
@@ -50,12 +50,11 @@ $fn=120;
 
 gopro_size = 15;
 
-slot_width = (extrusion_width == 30) ? 8 : 6;
-slot_thickness = (extrusion_width == 30) ? 1 : 1.8; //2 : 1.8;
+// slot_width = (extrusion_width == 30) ? 8 : 6;
+// slot_thickness = (extrusion_width == 30) ? 2 : 1.8;
 
-// For outer slot on T-profile
-slot_width = 10.2;
-slot_thickness = 1;
+slot_width = (extrusion_width == 30) ? 10.2 : 7;
+slot_thickness = (extrusion_width == 30) ? 1 : 0.5; 
 
 
 /*
