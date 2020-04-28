@@ -1,5 +1,5 @@
 // Customizable Bulbed Vase
-// Copyright: Olle Wreede 2019
+// Copyright: Olle Wreede 2020
 // License: CC BY-SA
 
 //CUSTOMIZER VARIABLES

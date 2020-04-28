@@ -53,8 +53,8 @@ plate_height = 60;
 
 $fn=120;
 
-slot_width = 8;
-slot_thickness = 2;
+slot_width = 10.2;
+slot_thickness = 1;
 
 
 module cylinder_outer(diameter, height, fn) {
@@ -118,7 +118,7 @@ module slot_ridge(plate_thickness, plate_height, hole_distance) {
     cube([plate_height, slot_width, slot_thickness], center=true);
 }
 
-module mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height, case_depth, corner_radius, fan_diameter, air_gap, slot_ridge) {
+module mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height, case_depth, corner_radius, fan_diameter, air_gap, slot_ridge, mount_hole_dia) {
     translate([0, air_gap, 0])
     translate([
         pi_width / 2 + plate_thickness / 2,
@@ -146,11 +146,11 @@ module mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height
         }
 
         translate([0, 0, slot_ridge * slot_thickness / 2])
-        mount_holes(mount_hole_diameter, 15, plate_thickness + slot_ridge * slot_thickness);
+        mount_holes(mount_hole_dia, 15, plate_thickness + slot_ridge * slot_thickness);
     }
 }
 
-module case_holder(pi_width, pi_height, thickness, radius, plate_thickness, plate_height, case_depth, fan_diameter, air_gap, slot_ridge) {
+module case_holder(pi_width, pi_height, thickness, radius, plate_thickness, plate_height, case_depth, fan_diameter, air_gap, slot_ridge, mount_hole_dia) {
     difference() {
         cube_rounded(pi_width + thickness * 2, pi_height + thickness * 2, case_depth + bracket_thickness, radius);
         
@@ -158,10 +158,10 @@ module case_holder(pi_width, pi_height, thickness, radius, plate_thickness, plat
         cube([pi_width, pi_height, case_depth], center=true);
     }
     
-    mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height, case_depth, radius, fan_diameter, air_gap, slot_ridge);
+    mount_plate(pi_width, pi_height, thickness, plate_thickness, plate_height, case_depth, radius, fan_diameter, air_gap, slot_ridge, mount_hole_dia);
 }
 
 //side_plate(bracket_thickness, plate_thickness, case_depth, pi_width, bracket_corner_radius, fan_hole_diameter);
 //mount_plate(pi_width, pi_height, bracket_thickness, plate_thickness, plate_height, case_depth, bracket_corner_radius, fan_hole_diameter, 0, extrusion_slot_ridge);
 
-case_holder(pi_width, pi_height, bracket_thickness, bracket_corner_radius, plate_thickness, plate_height, case_depth, fan_hole_diameter, air_gap_width, extrusion_slot_ridge);
+case_holder(pi_width, pi_height, bracket_thickness, bracket_corner_radius, plate_thickness, plate_height, case_depth, fan_hole_diameter, air_gap_width, extrusion_slot_ridge, mount_hole_diameter + 0.1);
