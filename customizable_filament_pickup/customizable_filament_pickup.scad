@@ -5,7 +5,6 @@
 //CUSTOMIZER VARIABLES
 
 // TODO: Add bowden coupling to simple filament hole version
-// TODO: Use teardrop holes
 
 /* [Base values] */
 
@@ -21,13 +20,16 @@ depth_of_pickup = 9; // [5:0.5:15]
 // Type of filament pickup
 filament_filter = 20; // [0:Simple filament hole, 15:15mm filament filter, 20:20mm filament filter]
 
+// Use teardrops on holes?
+teardrop_holes = 90; // [0:Round holes, 90:Teardrop holes]
+
 /* [Filament filter] */
 
 // Length in mm of filament filter
 filament_filter_length = 15; // [10:1:20]
 
 // Thickness in mm of filament filter cylinder wall
-filament_filter_thickness = 2; // [2:0.1:6]
+filament_filter_thickness = 2; // [1:0.1:4]
 
 // Width in mm of lip of the filament filter hole
 filament_filter_lip = 1; // [0.0:0.1:3.0]
@@ -61,7 +63,7 @@ mount_hole_depth = 8.5; // [5:0.5:10]
 
 /* [Hidden] */
 
-$fn=20;
+$fn=120;
 fudge = 0.1;
 bowden_coupling_hole_diameter = 12;
 bowden_coupling_hole_depth = 7;
@@ -69,9 +71,32 @@ filter_bottom_thickness = 12;
 
 /* Helper modules */
 
+/* From http://www.thingiverse.com/thing:3457
+   © 2010 whosawhatsis */
+module teardrop(radius, length, angle) {
+	rotate([0, angle, 0]) union() {
+		linear_extrude(height = length, center = true, convexity = radius, twist = 0)
+			circle(r = radius, center = true, $fn = 30);
+		linear_extrude(height = length, center = true, convexity = radius, twist = 0)
+			projection(cut = false) rotate([0, -angle, 0]) translate([0, 0, radius * sin(45) * 1.5]) cylinder(h = radius * sin(45), r1 = radius * sin(45), r2 = 0, center = true, $fn = 30);
+    }
+}
+
 module cylinder_outer(diameter, height, fn) {
    fudge = 1 / cos(180 / fn);
    cylinder(h=height, r=diameter / 2 * fudge, $fn=fn, center=true);
+}
+
+module hole(diameter, length) {
+    if (teardrop_holes > 0) {
+        rotate([teardrop_holes, teardrop_holes, 0])
+        teardrop(diameter / 2, length + fudge, teardrop_holes);
+    } else {
+        cylinder_outer(
+            diameter,
+            length + fudge,   
+            $fn);
+    }
 }
 
 module cube_rounded(width, height, thickness, radius=1) {
@@ -84,11 +109,11 @@ module cube_rounded(width, height, thickness, radius=1) {
 /* Mount */
 
 module mount_holes(hole_diameter, hole_distance, hole_depth) {
-    translate([hole_distance / 2, 0, 0])
-    cylinder_outer(hole_diameter, hole_depth, $fn);
+    translate([hole_distance / 2, 0, -fudge])
+    hole(hole_diameter, hole_depth);
     
-    translate([-hole_distance / 2, 0, 0])
-    cylinder_outer(hole_diameter, hole_depth, $fn);
+    translate([-hole_distance / 2, 0, -fudge])
+    hole(hole_diameter, hole_depth);
 }
 
 module filament_pickup_base(width, depth) {
@@ -171,10 +196,7 @@ module filament_pickup_filter(width, height, depth,
 //            translate([0, 0, (filter_bottom_thickness - bowden_coupling_hole_depth) / 2])
             translate([0, 0, filter_width / 2 - bowden_coupling_hole_depth - filament_hole_length / 2 - 0.5])
             {
-                cylinder_outer(
-                    filament_hole_diameter,
-                    filament_hole_length + 2,   
-                    $fn);
+                hole(filament_hole_diameter, filament_hole_length + 2);
                 
                 // Outer filament hole fillet
                 translate([0, 0, filament_hole_length / 2 - 0.5 + fudge])
@@ -264,7 +286,7 @@ module filament_pickup(width, height, depth,
 
         // Mount holes
         translate([0, 0, mount_hole_depth / 2])
-        #mount_holes(mount_hole_diameter, mount_hole_distance, mount_hole_depth);
+        mount_holes(mount_hole_diameter, mount_hole_distance, mount_hole_depth);
     }
 }
 
