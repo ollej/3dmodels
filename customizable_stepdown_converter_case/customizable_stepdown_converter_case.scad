@@ -33,10 +33,9 @@ fudge = 0.1;
 right_hole_ypos = 17.2;
 left_hole_ypos = -17.7;
 
-// TODO: Add holes for cables
-// TODO: Create lid
 // TODO: Add extrusion mount
-// TODO: Raised bottom, 7.5 from holes towards center
+// TODO: Add lid latches
+
 /* Helper modules */
 
 module cylinder_outer(diameter, height, fn) {
@@ -53,7 +52,7 @@ module cube_rounded(width, length, height, radius=1) {
 
 /* Model */
 
-module mount_holes(diameter, depth, width, length, height) {
+module mount_holes(diameter, depth, width, height) {
     translate([9.95, right_hole_ypos, -height/2 - depth/2])
     cylinder_outer(diameter, depth + fudge, $fn);
 
@@ -80,8 +79,22 @@ module raised_bottom(width, length, height, thickness, hole_diameter) {
         }
         
         translate([0, 0, thickness])
-        mount_holes(hole_diameter, thickness, width, length, height);
+        mount_holes(hole_diameter, thickness, width, height);
     }
+}
+
+module lid(width, length, thickness, corner_radius) {
+    cube_rounded(
+        width + thickness * 2,
+        length + thickness * 2,
+        thickness,
+        corner_radius);
+    translate([0, 0, thickness / 2])
+    cube_rounded(
+        width - fudge,
+        length - fudge,
+        thickness / 2,
+        corner_radius);
 }
 
 module case(width, length, height, thickness, corner_radius, hole_diameter) {
@@ -89,16 +102,18 @@ module case(width, length, height, thickness, corner_radius, hole_diameter) {
         cube_rounded(
             width + thickness * 2,
             length + thickness * 2,
-            height + thickness * 2,
+            height + thickness,
             corner_radius);
 
+        translate([0, 0, thickness / 2])
         cube_rounded(
             width,
             length,
-            height,
+            height + fudge,
             corner_radius);
    
-        mount_holes(hole_diameter, thickness, width, length, height);
+        translate([0, 0, thickness / 2])
+        mount_holes(hole_diameter, thickness, width, height);
         
         // Cable holes
         translate([0, length / 2 + thickness / 2, - height / 2 + 5 + thickness])
@@ -107,14 +122,6 @@ module case(width, length, height, thickness, corner_radius, hole_diameter) {
         translate([0, -length / 2 - thickness / 2, - height / 2 + 5 + thickness])
         rotate([0, 90, 90])
         cylinder_outer(3, thickness + fudge, $fn);
-        
-        // Remove lid
-        translate([0, 0, height / 2 + thickness / 2 ])
-        cube([
-            width + thickness * 2 + fudge,
-            length + thickness * 2 + fudge,
-            thickness + fudge],
-            center = true);
     }
     
     raised_bottom(width, length, height, thickness, hole_diameter);
@@ -127,3 +134,13 @@ case(
     wall_thickness,
     corner_radius_of_case,
     mount_hole_diameter);
+
+translate([
+    width_of_case * 1.5,
+    0,
+    - (height_of_case + wall_thickness * 2) / 2 + wall_thickness / 2])
+lid(
+    width_of_case,
+    length_of_case,
+    wall_thickness,
+    corner_radius_of_case);
