@@ -89,7 +89,7 @@ module lid(width, length, thickness, corner_radius) {
         length + thickness * 2,
         thickness,
         corner_radius);
-    translate([0, 0, thickness / 2])
+    translate([0, 0, thickness - thickness/4])
     cube_rounded(
         width - fudge,
         length - fudge,
@@ -130,7 +130,7 @@ module case(width, length, height, thickness, corner_radius, hole_diameter) {
 case(
     width_of_case,
     length_of_case,
-    height_of_case + wall_thickness,
+    height_of_case + wall_thickness * 1.5,
     wall_thickness,
     corner_radius_of_case,
     mount_hole_diameter);
@@ -138,7 +138,8 @@ case(
 translate([
     width_of_case * 1.5,
     0,
-    - (height_of_case + wall_thickness * 2) / 2 + wall_thickness / 2])
+    - (height_of_case + wall_thickness * 2.5) / 2 
+        + wall_thickness / 2])
 lid(
     width_of_case,
     length_of_case,
