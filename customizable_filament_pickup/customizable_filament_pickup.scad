@@ -36,16 +36,16 @@ filament_filter_lip = 1; // [0.0:0.1:3.0]
 
 /* [Simple bowden hole] */
 
-// Width in mm of pickup top (not used for filter)
+// Width in mm of pickup top
 width_top = 15; // [10:20]
 
-// Depth in mm of pickup top (not used for filter)
+// Depth in mm of pickup top
 depth_top = 9; // [5:0.5:15]
 
-// Diameter in mm of filament hole (not used for filter)
+// Diameter in mm of filament hole
 filament_hole_diameter = 2.4; // [1.8:0.1:4]
 
-// Diameter in mm of bowden tube hole (not used for filter)
+// Diameter in mm of bowden tube hole
 bowden_hole_diameter = 4.2; // [4:0.1:8]
 
 /* [Mount holes] */
