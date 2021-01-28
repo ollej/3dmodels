@@ -31,16 +31,16 @@ color_of_black = "black";
 color_of_white = "red";
 
 // Distance between parts of board
-distance_between_parts = 10; // [0:1:20]
+distance_between_parts = 5; // [0:1:20]
 
 /* [Displayed parts] */
 
 show_left_board = true;
 show_middle_board = true;
 show_right_board = true;
-show_black_squares = false;
+show_black_squares = true;
 show_white_squares = true;
-show_edges = false;
+show_edges = true;
 
 //CUSTOMIZER VARIABLES END
 
@@ -162,10 +162,7 @@ module board_middle(side, thickness, middle, square_col, off) {
     board_line(side, thickness, square_col, !off);
 }
 
-
-
-// Left board
-if (show_left_board) {
+module side_board() {
     if (show_edges) {
         board_edge_4x3(
             width_of_square,
@@ -188,6 +185,11 @@ if (show_left_board) {
             color_of_white,
             true);
     }
+}
+
+// Left board
+if (show_left_board) {
+    side_board();
 }
 
 if (show_middle_board) {
@@ -221,33 +223,11 @@ if (show_middle_board) {
 
 // Right board
 if (show_right_board) {
-    translate([0, 
-    - width_of_square * 2 - width_of_middle_line - distance_between_parts * 2, thickness_of_board])
-    rotate([-180, 0, 0])
-    
-     {
-        if (show_edges) {
-            board_edge_4x3(
-                width_of_square,
-                thickness_of_board,
-                width_of_edges,
-                color_of_edges,
-                radius_of_board_corners);
-        }
-        if (show_black_squares) {
-            board_4x3(
-                width_of_square,
-                thickness_of_board,
-                color_of_black,
-                false);
-        }
-        if (show_white_squares) {
-            board_4x3(
-                width_of_square,
-                thickness_of_board,
-                color_of_white,
-                true);
-        }
-    }
+    translate([
+        width_of_square * 4, 
+        - width_of_square * 2
+        - width_of_middle_line
+        - distance_between_parts * 2, 0])
+    rotate([0, 0, 180])
+    side_board();
 }
-
