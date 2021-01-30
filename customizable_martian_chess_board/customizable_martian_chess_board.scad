@@ -2,6 +2,10 @@
 // Copyright: Olle Wreede 2021
 // License: CC BY-SA
 
+// TODO
+// * Allow single color bottom
+// * Generate single extruder color version with different heights for colors
+
 //CUSTOMIZER VARIABLES
 
 /* [Board] */
@@ -32,6 +36,9 @@ color_of_white = "red";
 
 // Distance between parts of board
 distance_between_parts = 5; // [0:1:20]
+
+// Which color should be in lower right corner
+invert_square_colors = false;
 
 /* [Displayed parts] */
 
@@ -176,17 +183,18 @@ module side_board() {
             width_of_square,
             thickness_of_board,
             color_of_black,
-            false);
+            invert_square_colors);
     }
     if (show_white_squares) {
         board_4x3(
             width_of_square,
             thickness_of_board,
             color_of_white,
-            true);
+            !invert_square_colors);
     }
 }
 
+rotate([0, 0, 90]) {
 // Left board
 if (show_left_board) {
     side_board();
@@ -208,7 +216,7 @@ if (show_middle_board) {
                 thickness_of_board,
                 width_of_middle_line,
                 color_of_black,
-                false);
+                invert_square_colors);
         }
         if (show_white_squares) {
             board_middle(
@@ -216,7 +224,7 @@ if (show_middle_board) {
                 thickness_of_board,
                 width_of_middle_line,
                 color_of_white,
-                true);
+                !invert_square_colors);
         }
     }
 }
@@ -230,4 +238,5 @@ if (show_right_board) {
         - distance_between_parts * 2, 0])
     rotate([0, 0, 180])
     side_board();
+}
 }
