@@ -85,14 +85,6 @@ module board_square(side, thickness, col) {
     cube(size = [side, side, thickness], center = false);
 }
 
-module board_line(side, squaresx, thickness, col, off = false) {
-    off_distance = off ? side : 0;
-    translate([off_distance, 0, 0])    
-    board_square(side, thickness, col);
-    translate([off_distance + side * 2, 0, 0]) 
-    board_square(side, thickness, col);
-}
-
 module board_side(
     side,
     squaresx,
