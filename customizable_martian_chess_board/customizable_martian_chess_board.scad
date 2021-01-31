@@ -3,7 +3,6 @@
 // License: CC BY-SA
 
 // TODO
-// * Allow single color bottom
 // * Generate single extruder color version with different heights for colors
 
 //CUSTOMIZER VARIABLES
@@ -13,8 +12,11 @@
 // Width in mm of each square
 width_of_square = 28; // [20:0.5:35]
 
-// Thickness in mm of board
-thickness_of_board = 4; // [3:1:10]
+// Thickness in mm of board (excluding bottom)
+thickness_of_board = 4; // [1:0.2:10]
+
+// Thickness of single color bottom
+thickness_of_bottom = 3; // [0:0.2:5]
 
 // Width in mm of line between board sides
 width_of_middle_line = 10; // [0:0.5:15]
@@ -25,6 +27,17 @@ width_of_edges = 2; // [0:1:10]
 // Radius of corners of board in mm
 radius_of_board_corners = 2; // [0:0.2:5]
 
+// Distance between parts of board
+distance_between_parts = 5; // [0:1:20]
+
+// Number of squares along width
+number_of_squares_width = 4;
+
+// Number of squares along length
+number_of_squares_length = 4;
+
+/* [Colors] */
+
 // Color of edges
 color_of_edges = "purple";
 
@@ -34,8 +47,8 @@ color_of_black = "black";
 // Color of white squares
 color_of_white = "red";
 
-// Distance between parts of board
-distance_between_parts = 5; // [0:1:20]
+// Color of board bottom
+color_of_bottom = "blue";
 
 // Which color should be in lower right corner
 invert_square_colors = false;
@@ -48,6 +61,7 @@ show_right_board = true;
 show_black_squares = true;
 show_white_squares = true;
 show_edges = true;
+show_bottom = true;
 
 //CUSTOMIZER VARIABLES END
 
@@ -71,30 +85,40 @@ module board_square(side, thickness, col) {
     cube(size = [side, side, thickness], center = false);
 }
 
-module board_line(side, thickness, col, off = false) {
+module board_line(side, squaresx, thickness, col, off = false) {
     off_distance = off ? side : 0;
     translate([off_distance, 0, 0])    
     board_square(side, thickness, col);
-    translate([off_distance + side * 2, 0, 0])    
+    translate([off_distance + side * 2, 0, 0]) 
     board_square(side, thickness, col);
 }
 
-module board_4x3(
+module board_side(
     side,
+    squaresx,
+    squaresy,
     thickness,
     col,
     off) {
-    board_line(side, thickness, col, off);
-
-    translate([0, side, 0])
-    board_line(side, thickness, col, !off);
-    
-    translate([0, side * 2, 0])
-    board_line(side, thickness, col, off);
+    for (i = [0 : squaresy - 1]) {
+        translate([0, side * i, 0]) {
+            black = (i % 2 == 0) ? 1 : 0;
+            white = (i % 2 != 0) ? 1 : 0;
+            start = off ? black : white;
+            for (j = [start : squaresx - 1]) {
+                if (((j + start) % 2) == 0) {
+                    translate([side * j, 0, 0]) 
+                    board_square(side, thickness, col);
+                }
+            }
+        }
+    }
 }
 
-module board_edge_4x3(
+module board_edge_side(
     side,
+    squaresx,
+    squaresy,
     thickness,
     edge,
     edge_col,
@@ -103,37 +127,38 @@ module board_edge_4x3(
         difference() {
             translate([-edge, 0, 0])
             cube(size = [
-                side * 4 + edge * 2,
-                side * 3 + edge,
+                side * squaresx + edge * 2,
+                side * (squaresy - 1) + edge,
                 thickness],
                 center = false);
 
             translate([0, -fudge, -fudge])
             cube(size = [
-                side * 4,
-                side * 3 + fudge,
+                side * squaresx,
+                side * (squaresy - 1) + fudge,
                 thickness + fudge * 2],
                 center = false);
 
             // Rounded corners
             translate([
                 -edge,
-                side * 3 + radius,
+                side * (squaresy - 1) + edge,
                 thickness / 2])
             rotate([0, 0, 270])
-            fillet(radius*2, thickness + fudge * 2);
+            fillet(radius * 2, thickness + fudge * 2);
             translate([
-                side * 4 + radius,
-                side * 3 + radius,
+                side * squaresx + edge,
+                side * (squaresy - 1) + edge,
                 thickness / 2])
             rotate([0, 0, 180])
-            fillet(radius, thickness + fudge * 2);
+            fillet(radius * 2, thickness + fudge * 2);
         }
     }
 }
 
 module board_edge_middle(
     side,
+    squaresx,
     thickness,
     middle,
     edge,
@@ -142,14 +167,14 @@ module board_edge_middle(
         difference() {
             translate([-edge, 0, 0])
             cube(size = [
-                side * 4 + edge * 2,
+                side * squaresx + edge * 2,
                 side * 2 + middle,
                 thickness],
                 center = false);
 
             translate([0, -fudge, -fudge])
             cube(size = [
-                side * 4,
+                side * squaresx,
                 side * 2 + middle + fudge * 2,
                 thickness + fudge * 2],
                 center = false);
@@ -158,36 +183,104 @@ module board_edge_middle(
         // Middle line
         translate([0, side, 0])
         color(edge_col, 1.0)
-        cube(size = [side * 4, middle, thickness], center = false);
+        cube(size = [side * squaresx, middle, thickness], center = false);
     }
 }
 
-module board_middle(side, thickness, middle, square_col, off) {
-    board_line(side, thickness, square_col, off);
-
+module board_middle(side, squaresx, thickness, middle, square_col, off) {
+    board_side(side, squaresx, 1, thickness, square_col, off);
     translate([0, side + middle, 0])
-    board_line(side, thickness, square_col, !off);
+    board_side(side, squaresx, 1, thickness, square_col, !off);
+}
+
+module board_bottom(thickness, squaresx, squaresy, side, edge, middle, radius, col) {
+    translate([0, 0, -thickness])
+    color(col, 1.0) {
+        // Bottom of middle
+        translate([-edge, - side * 2 - middle - distance_between_parts, 0])
+        cube(size = [
+            side * squaresx + edge * 2,
+            side * 2 + middle,
+            thickness],
+            center = false);
+        
+        // Bottom of left side
+        difference() {
+            translate([-edge, 0, 0])
+            cube(size = [
+                side * squaresx + edge * 2,
+                side * (squaresy - 1) + edge,
+                thickness],
+                center = false);
+
+            // Rounded corners
+            translate([
+                -edge,
+                side * (squaresy - 1) + edge,
+                thickness / 2])
+            rotate([0, 0, 270])
+            fillet(radius * 2, thickness + fudge * 2);
+            translate([
+                side * squaresx + edge,
+                side * (squaresy - 1) + edge,
+                thickness / 2])
+            rotate([0, 0, 180])
+            fillet(radius * 2, thickness + fudge * 2);
+        }
+
+        // Bottom of right side
+        translate([
+            -edge,
+            - side * (squaresy + 1) - middle - edge - distance_between_parts,
+            0])
+        difference() {
+            cube(size = [
+                side * squaresx + edge * 2,
+                side * (squaresy - 1) + edge,
+                thickness],
+                center = false);
+
+            // Rounded corners
+            translate([
+                0,
+                0,
+                thickness / 2])
+            fillet(radius * 2, thickness + fudge * 2);
+            translate([
+                side * squaresx + edge * 2,
+                0,
+                thickness / 2])
+            rotate([0, 0, 90])
+            fillet(radius * 2, thickness + fudge * 2);
+        }
+    }
 }
 
 module side_board() {
     if (show_edges) {
-        board_edge_4x3(
+        board_edge_side(
             width_of_square,
+            number_of_squares_width,
+            number_of_squares_length,
             thickness_of_board,
             width_of_edges,
             color_of_edges,
             radius_of_board_corners);
     }
     if (show_black_squares) {
-        board_4x3(
+        board_side(
             width_of_square,
+            number_of_squares_width,
+            number_of_squares_length - 1,
             thickness_of_board,
             color_of_black,
             invert_square_colors);
     }
     if (show_white_squares) {
-        board_4x3(
+        board_side(
             width_of_square,
+            number_of_squares_width,
+            number_of_squares_length - 1,
             thickness_of_board,
             color_of_white,
             !invert_square_colors);
@@ -205,6 +298,7 @@ if (show_middle_board) {
         if (show_edges) {
             board_edge_middle(
                 width_of_square,
+                number_of_squares_width,
                 thickness_of_board,
                 width_of_middle_line,
                 width_of_edges,
@@ -213,6 +307,7 @@ if (show_middle_board) {
         if (show_black_squares) {
             board_middle(
                 width_of_square,
+                number_of_squares_width,
                 thickness_of_board,
                 width_of_middle_line,
                 color_of_black,
@@ -221,6 +316,7 @@ if (show_middle_board) {
         if (show_white_squares) {
             board_middle(
                 width_of_square,
+                number_of_squares_width,
                 thickness_of_board,
                 width_of_middle_line,
                 color_of_white,
@@ -232,11 +328,23 @@ if (show_middle_board) {
 // Right board
 if (show_right_board) {
     translate([
-        width_of_square * 4, 
+        width_of_square * number_of_squares_width, 
         - width_of_square * 2
         - width_of_middle_line
         - distance_between_parts * 2, 0])
     rotate([0, 0, 180])
     side_board();
+}
+
+if (show_bottom) {
+    board_bottom(
+        thickness_of_bottom,
+        number_of_squares_width,
+        number_of_squares_length,
+        width_of_square,
+        width_of_edges,
+        width_of_middle_line,
+        radius_of_board_corners,
+        color_of_bottom);
 }
 }
