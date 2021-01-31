@@ -13,7 +13,7 @@
 width_of_square = 28; // [20:0.5:35]
 
 // Thickness in mm of board (excluding bottom)
-thickness_of_board = 4; // [1:0.2:10]
+thickness_of_board = 1; // [0.2:0.2:5]
 
 // Thickness of single color bottom
 thickness_of_bottom = 3; // [0:0.2:5]
@@ -22,19 +22,29 @@ thickness_of_bottom = 3; // [0:0.2:5]
 width_of_middle_line = 10; // [0:0.5:15]
 
 // Width in mm of edges around squares
-width_of_edges = 2; // [0:1:10]
+width_of_edges = 5; // [0:1:15]
 
 // Radius of corners of board in mm
-radius_of_board_corners = 2; // [0:0.2:5]
+radius_of_board_corners = 2; // [0:0.2:10]
 
 // Distance between parts of board
 distance_between_parts = 5; // [0:1:20]
 
 // Number of squares along width
-number_of_squares_width = 4;
+number_of_squares_width = 4; // [2:2:10]
 
-// Number of squares along length
-number_of_squares_length = 4;
+// Number of squares along length of either side
+number_of_squares_length = 4; // [2:1:10]
+
+/* [Displayed parts] */
+
+show_left_board = true;
+show_middle_board = true;
+show_right_board = true;
+show_black_squares = true;
+show_white_squares = true;
+show_edges = true;
+show_bottom = true;
 
 /* [Colors] */
 
@@ -52,16 +62,6 @@ color_of_bottom = "blue";
 
 // Which color should be in lower right corner
 invert_square_colors = false;
-
-/* [Displayed parts] */
-
-show_left_board = true;
-show_middle_board = true;
-show_right_board = true;
-show_black_squares = true;
-show_white_squares = true;
-show_edges = true;
-show_bottom = true;
 
 //CUSTOMIZER VARIABLES END
 
@@ -280,63 +280,63 @@ module side_board() {
 }
 
 rotate([0, 0, 90]) {
-// Left board
-if (show_left_board) {
-    side_board();
-}
+    // Left board
+    if (show_left_board) {
+        side_board();
+    }
 
-if (show_middle_board) {
-    translate([0, - width_of_square * 2 - width_of_middle_line - distance_between_parts, 0]) {
-        if (show_edges) {
-            board_edge_middle(
-                width_of_square,
-                number_of_squares_width,
-                thickness_of_board,
-                width_of_middle_line,
-                width_of_edges,
-                color_of_edges);
-        }
-        if (show_black_squares) {
-            board_middle(
-                width_of_square,
-                number_of_squares_width,
-                thickness_of_board,
-                width_of_middle_line,
-                color_of_black,
-                invert_square_colors);
-        }
-        if (show_white_squares) {
-            board_middle(
-                width_of_square,
-                number_of_squares_width,
-                thickness_of_board,
-                width_of_middle_line,
-                color_of_white,
-                !invert_square_colors);
+    if (show_middle_board) {
+        translate([0, - width_of_square * 2 - width_of_middle_line - distance_between_parts, 0]) {
+            if (show_edges) {
+                board_edge_middle(
+                    width_of_square,
+                    number_of_squares_width,
+                    thickness_of_board,
+                    width_of_middle_line,
+                    width_of_edges,
+                    color_of_edges);
+            }
+            if (show_black_squares) {
+                board_middle(
+                    width_of_square,
+                    number_of_squares_width,
+                    thickness_of_board,
+                    width_of_middle_line,
+                    color_of_black,
+                    invert_square_colors);
+            }
+            if (show_white_squares) {
+                board_middle(
+                    width_of_square,
+                    number_of_squares_width,
+                    thickness_of_board,
+                    width_of_middle_line,
+                    color_of_white,
+                    !invert_square_colors);
+            }
         }
     }
-}
 
-// Right board
-if (show_right_board) {
-    translate([
-        width_of_square * number_of_squares_width, 
-        - width_of_square * 2
-        - width_of_middle_line
-        - distance_between_parts * 2, 0])
-    rotate([0, 0, 180])
-    side_board();
-}
+    // Right board
+    if (show_right_board) {
+        translate([
+            width_of_square * number_of_squares_width, 
+            - width_of_square * 2
+            - width_of_middle_line
+            - distance_between_parts * 2, 0])
+        rotate([0, 0, 180])
+        side_board();
+    }
 
-if (show_bottom) {
-    board_bottom(
-        thickness_of_bottom,
-        number_of_squares_width,
-        number_of_squares_length,
-        width_of_square,
-        width_of_edges,
-        width_of_middle_line,
-        radius_of_board_corners,
-        color_of_bottom);
-}
+    if (show_bottom) {
+        board_bottom(
+            thickness_of_bottom,
+            number_of_squares_width,
+            number_of_squares_length,
+            width_of_square,
+            width_of_edges,
+            width_of_middle_line,
+            radius_of_board_corners,
+            color_of_bottom);
+    }
 }
