@@ -223,7 +223,7 @@ module board_bottom(thickness, squaresx, squaresy, side, edge, middle, radius, c
         // Bottom of right side
         translate([
             -edge,
-            - side * (squaresy + 1) - middle - edge - distance_between_parts,
+            - side * (squaresy + 1) - middle - edge - distance_between_parts * 2,
             0])
         difference() {
             cube(size = [
